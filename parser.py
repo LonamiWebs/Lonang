@@ -5,17 +5,23 @@ import re
 source = \
 '''
 
-ax = 5
-bx = 84
+ax = 4
+bx = 6
 ax += bx
 
-if bx == 84 { @primerIf
+if bx == 6 { @primerIf
     ax = 7
 }
 
+bx = 0
 repeat 10 with cx { @primerLoop
-    
+    if ax < 10 {
+        bx += 1
+    }
+
+    ax += 1
 }
+
 
 
 '''
@@ -44,11 +50,21 @@ repeat 10 with cx { @primerLoop
 #   This makes it explicit that cx will be used although any other can
 
 
-# Global 'if' IDs
-ifid = 0
+# Global IDs
+globalid = 0
+def get_uid(default=None):
+    global globalid
 
-# Pending if jump labels
-pending_labels = []
+    if default:
+        return default
+
+    result = f'_uid_{globalid}'
+    globalid += 1
+    return result
+
+
+# Pending closing braces, such as if jump labels
+closing_braces = []
 
 # Compare To Opposite jump Instruction
 ctoi = {
@@ -61,43 +77,111 @@ ctoi = {
 }
 
 
+# Small utility to build more readable regexes
+# ' ' (one space) will be replaced with r'\s*'
+# '  ' (two spaces) will be replaced with r'\s+'
+def recompile(string):
+    return re.compile(string.replace('  ', r'\s+').replace(' ', r'\s*'))
+
 # Used to determine the statement
-rassign = re.compile(r'(\w+)\s*=\s*([\w\d]+)')
-radd = re.compile(r'(\w+)\s*\+=\s*([\w\d]+)')
-rif = re.compile(r'if\s+(\w+)\s*([<>=!]+)\s*([\w\d]+)\s*{\s*(?:@(\w+))?')
-rendif = re.compile(r'}')
+rassign = recompile(r'(\w+) = ([\w\d]+)')
+radd = recompile(r'(\w+) \+= ([\w\d]+)')
+rif = recompile(r'if  (\w+) ([<>=!]+) ([\w\d]+) { (?:@(\w+))?')
+rrepeat = recompile(r'repeat  ([\w\d]+)  with  (\w+) { (?:@(\w+))?')
+
+rendblock = recompile(r'}')
 
 
-regexes = [rassign, radd, rif, rendif]
+regexes = [rassign, radd, rif, rrepeat,
+           rendblock]
+
+
+def helperassign(dst, src):
+    """Helper assign with support for assigning 8 bits to 16"""
+    # TODO Add support for actually assigning CL/CH to CX (i.e. XOR the rest)
+    return f'mov {dst}, {src}'
+
+
+def parseint(value):
+    """Tries parsing an integer value, returns None on failure"""
+    try:
+        if value.startswith('0x'):
+            return int(value[2:], base=16)
+
+        if value.endswith('h'):
+            return int(value[:-1], base=16)
+
+        if value.startswith('0b'):
+            return int(value[2:], base=2)
+
+        if value.endswith('b'):
+            return int(value[:-1], base=2)
+
+        return int(value)
+    except ValueError:
+        return None
+
 
 # Action(s) to be appended on successful match
 def rassign_geti(m):
-    return f'mov {m.group(1)}, {m.group(2)}'
+    return helperassign(m.group(1), m.group(2))
 
 
 def radd_geti(m):
-    return f'mov {m.group(1)}, {m.group(2)}'
+    return f'add {m.group(1)}, {m.group(2)}'
 
 
 def rif_geti(m):
-    if m.group(4):
-        label = m.group(4)
-    else:
-        label = 'if' + ifid
-        ifid += 1
-    
-    pending_labels.append(label)
+    label = get_uid(m.group(4))
+    closing_braces.append(f'{label}:')
     return [
         f'cmp {m.group(1)}, {m.group(3)}',
         f'{ctoi[m.group(2)]} {label}'
     ]
 
 
-def rendif_geti(m):
-    return f'{pending_labels.pop()}:'
+def rrepeat_geti(m):
+    result = []
+    label = get_uid(m.group(3))
+    labelstart = label + '_s'
+    labelend = label + '_e'
 
 
-getinstructions = [rassign_geti, radd_geti, rif_geti, rendif_geti]
+    # Initialize our loop counter
+    if m.group(1) != m.group(2):
+        result.append(helperassign(m.group(2), m.group(1)))
+
+    # Sanity check, if 0 don't enter the loop unless we know it's not 0
+    # This won't optimize away the case where the value is 0
+    count = parseint(m.group(1))
+    if count is None or count <= 0:  # count unknown or zero
+        result.append(f'test {m.group(2)}, {m.group(2)}')
+        result.append(f'jz {labelend}')
+
+    # Add the start label so we can jump here
+    result.append(f'{labelstart}:')
+
+    # TODO I need two pops? Well I can work around with \n;
+    # '}' should be handled specially
+    if m.group(2) == 'cx':
+        # We can use 'loop' if using 'cx'
+        closing_braces.append(f'''loop {labelstart}
+{labelend}:''')
+
+    else:
+        closing_braces.append(f'''dec {m.group(2)}
+jnz {labelstart}
+{labelend}:''')
+
+    return result
+
+
+def rendblock_geti(m):
+    return f'{closing_braces.pop()}'
+
+
+getinstructions = [rassign_geti, radd_geti, rif_geti, rrepeat_geti,
+                   rendblock_geti]
 
 
 
