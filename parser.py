@@ -50,6 +50,21 @@ repeat 10 with cx { @primerLoop
 #   This makes it explicit that cx will be used although any other can
 
 
+# Utilities
+class strlist(list):
+    def add(self, values):
+        """Extends or appends the string value(s)"""
+        if isinstance(values, str):
+            print('Adding string:', values)
+            self.append(values)
+        elif isinstance(values, list):
+            print('Adding list:', values)
+            self.extend(values)
+        else:
+            print('Wtfing value:', values)
+            self.append(str(values))
+
+
 # Global IDs
 globalid = 0
 def get_uid(default=None):
@@ -89,11 +104,8 @@ radd = recompile(r'(\w+) \+= ([\w\d]+)')
 rif = recompile(r'if  (\w+) ([<>=!]+) ([\w\d]+) { (?:@(\w+))?')
 rrepeat = recompile(r'repeat  ([\w\d]+)  with  (\w+) { (?:@(\w+))?')
 
-rendblock = recompile(r'}')
 
-
-regexes = [rassign, radd, rif, rrepeat,
-           rendblock]
+regexes = [rassign, radd, rif, rrepeat]
 
 
 def helperassign(dst, src):
@@ -161,28 +173,23 @@ def rrepeat_geti(m):
     # Add the start label so we can jump here
     result.append(f'{labelstart}:')
 
-    # TODO I need two pops? Well I can work around with \n;
-    # '}' should be handled specially
     if m.group(2) == 'cx':
         # We can use 'loop' if using 'cx'
-        closing_braces.append(f'''loop {labelstart}
-{labelend}:''')
-
+        closing_braces.append([
+            f'loop {labelstart}',
+            f'{labelend}:'
+        ])
     else:
-        closing_braces.append(f'''dec {m.group(2)}
-jnz {labelstart}
-{labelend}:''')
+        closing_braces.append([
+            f'dec {m.group(2)}',
+            f'jnz {labelstart}',
+            f'{labelend}:'
+        ])
 
     return result
 
 
-def rendblock_geti(m):
-    return f'{closing_braces.pop()}'
-
-
-getinstructions = [rassign_geti, radd_geti, rif_geti, rrepeat_geti,
-                   rendblock_geti]
-
+getinstructions = [rassign_geti, radd_geti, rif_geti, rrepeat_geti]
 
 
 # Combine both so we can iterate over them
@@ -190,7 +197,7 @@ regex_getis = list(zip(regexes, getinstructions))
 
 
 def parse(source):
-    compiled = []
+    compiled = strlist()
     for i, line in enumerate(source.split('\n')):
         line = line.strip()
         if not line:
@@ -204,17 +211,24 @@ def parse(source):
             m = regex.search(line)
             if m:
                 ok = True
-                result = geti(m)
-                if isinstance(result, str):
-                    compiled.append(result)
-                elif isinstance(result, list):
-                    compiled.extend(result)
+                compiled.add(geti(m))
                 break
         
-        if not ok:
+        if ok:
+            continue
+
+        # Special case for the closing brace
+        if '}' in line:
+            try:
+                compiled.add(closing_braces.pop())
+            except IndexError:
+                print(f'ERROR: Non-matching closing brace at line {i+1}')
+                return None
+        else:
+            # Unknown line, error and early exit
             print(f'ERROR: Unknown statement at line {i+1}:\n    {line}')
             return None
-    
+
     return compiled
 
 
