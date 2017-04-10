@@ -8,13 +8,14 @@ r'''
 short number = 4242
 byte little = 24
 string mystr = "Hello\r\nworld!"
+const VALUE = 'L'
 
 ax = 4
 bx = 6
 ax += bx
 
 if bx == 6 { @primerIf
-    ax = 7
+    ax = VALUE
 }
 
 bx = 0
@@ -89,7 +90,7 @@ def get_uid(default=None):
 # Pending closing braces, such as if jump labels
 closing_braces = []
 
-# Variables, and constants replaced in compile time
+# Variables, and constant regexes replaced in compile time
 variables = []
 constants = []
 
@@ -130,7 +131,7 @@ rif = recompile(r'if  (\w+) ([<>=!]+) ([\w\d]+) {')
 relse = recompile(r'} else {')
 rrepeat = recompile(r'repeat  ([\w\d]+)  with  (\w+) {')
 
-rvariable = recompile(r'(byte|short|string|const)  (\w+) = ([\w\d", \\]+)')
+rvariable = recompile(r'''(byte|short|string|const)  (\w+) = ([\w\d"', \\]+)''')
 
 
 def helperassign(dst, src):
@@ -275,7 +276,8 @@ def rvariable_geti(m):
         variables.append(f'{m.group(2)} DB {result}')
 
     elif m.group(1) == 'const':
-        constants.append(m.group(3))
+        r = re.compile(fr'\b{m.group(2)}\b')
+        constants.append((r, m.group(3)))
 
     # We cannot return None
     return []
@@ -347,7 +349,10 @@ if compiled:
             if c[-1] != ':':
                 f.write('    ')
 
-            # TODO Replace constants
+            # Replace constants
+            for constant, value in constants:
+                c = constant.sub(value, c)
+
             f.write(c)
             f.write('\n')
 
