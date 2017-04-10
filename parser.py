@@ -55,13 +55,10 @@ class strlist(list):
     def add(self, values):
         """Extends or appends the string value(s)"""
         if isinstance(values, str):
-            print('Adding string:', values)
             self.append(values)
         elif isinstance(values, list):
-            print('Adding list:', values)
             self.extend(values)
         else:
-            print('Wtfing value:', values)
             self.append(str(values))
 
 
@@ -93,19 +90,29 @@ ctoi = {
 
 
 # Small utility to build more readable regexes
-# ' ' (one space) will be replaced with r'\s*'
-# '  ' (two spaces) will be replaced with r'\s+'
 def recompile(string):
-    return re.compile(string.replace('  ', r'\s+').replace(' ', r'\s*'))
+    """Used to compile "readable" regexes, with the following changes:
+        ' ' (one space) will be replaced with r'\s*'
+        '  ' (two spaces) will be replaced with r'\s+'
+
+        '(?:\s*@(\w+))?' will be added to the end to allow @labelname
+    """
+    sanitized = string.replace('  ', r'\s+').replace(' ', r'\s*')
+    sanitized = sanitized + r'(?:\s*@(\w+))?'
+    return re.compile(sanitized)
+
+
+# List of all "'r' + statement" paired with "'r' + statement + '_geti'"
+available_statements = [
+    'assign', 'add', 'if', 'else', 'repeat'
+]
 
 # Used to determine the statement
 rassign = recompile(r'(\w+) = ([\w\d]+)')
 radd = recompile(r'(\w+) \+= ([\w\d]+)')
-rif = recompile(r'if  (\w+) ([<>=!]+) ([\w\d]+) { (?:@(\w+))?')
-rrepeat = recompile(r'repeat  ([\w\d]+)  with  (\w+) { (?:@(\w+))?')
-
-
-regexes = [rassign, radd, rif, rrepeat]
+rif = recompile(r'if  (\w+) ([<>=!]+) ([\w\d]+) {')
+relse = recompile(r'} else {')
+rrepeat = recompile(r'repeat  ([\w\d]+)  with  (\w+) {')
 
 
 def helperassign(dst, src):
@@ -152,6 +159,29 @@ def rif_geti(m):
     ]
 
 
+def relse_geti(m):
+    # We consume the if closing brace
+    iflabel = closing_braces.pop()[:-1]
+
+    # Build the else label based on the if, unless a name was provided
+    if m.group(1):
+        elselabel = m.group(1)
+    else:
+        elselabel = iflabel + '_else'
+
+    # After the else brace closes, ending the met if should skip the else
+    closing_braces.append(f'{elselabel}:')
+
+    return [
+        # After the if finished, it needs to skip the else end part
+        f'jmp {elselabel}',
+
+        # Add the if label back, if this condition was not met
+        # on the if jump, then we need to jump here, to the else (if label)
+        f'{iflabel}:'
+    ]
+
+
 def rrepeat_geti(m):
     result = []
     label = get_uid(m.group(3))
@@ -189,11 +219,10 @@ def rrepeat_geti(m):
     return result
 
 
-getinstructions = [rassign_geti, radd_geti, rif_geti, rrepeat_geti]
-
-
-# Combine both so we can iterate over them
-regex_getis = list(zip(regexes, getinstructions))
+# Get the regex and their functions and pair them together
+g = globals().copy()
+regex_getis = [(g[f'r{s}'], g[f'r{s}_geti'])
+                for s in available_statements]
 
 
 def parse(source):
