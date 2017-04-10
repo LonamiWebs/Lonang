@@ -3,7 +3,11 @@
 import re
 
 source = \
-'''
+r'''
+
+short number = 4242
+byte little = 24
+string mystr = "Hello\r\nworld!"
 
 ax = 4
 bx = 6
@@ -48,7 +52,14 @@ repeat 10 with cx { @primerLoop
 #     }
 #
 #   This makes it explicit that cx will be used although any other can
-
+#
+#   It is possible to define variables as follows:
+#     byte mybyte = 0x7F
+#     short myint = 0x7FFF
+#     string str = "Some string...\r\n"
+#
+#   Constants to be replaced in time:
+#     const myconst = 0x7FFF
 
 # Utilities
 class strlist(list):
@@ -78,6 +89,10 @@ def get_uid(default=None):
 # Pending closing braces, such as if jump labels
 closing_braces = []
 
+# Variables, and constants replaced in compile time
+variables = []
+constants = []
+
 # Compare To Opposite jump Instruction
 ctoi = {
     '<': 'jge',
@@ -104,7 +119,8 @@ def recompile(string):
 
 # List of all "'r' + statement" paired with "'r' + statement + '_geti'"
 available_statements = [
-    'assign', 'add', 'if', 'else', 'repeat'
+    'assign', 'add', 'if', 'else', 'repeat',
+    'variable'
 ]
 
 # Used to determine the statement
@@ -113,6 +129,8 @@ radd = recompile(r'(\w+) \+= ([\w\d]+)')
 rif = recompile(r'if  (\w+) ([<>=!]+) ([\w\d]+) {')
 relse = recompile(r'} else {')
 rrepeat = recompile(r'repeat  ([\w\d]+)  with  (\w+) {')
+
+rvariable = recompile(r'(byte|short|string|const)  (\w+) = ([\w\d", \\]+)')
 
 
 def helperassign(dst, src):
@@ -219,6 +237,50 @@ def rrepeat_geti(m):
     return result
 
 
+def rvariable_geti(m):
+    # TODO Support for vectors (SomeString DB 23 DUP(?))
+    # TODO Perform more checks to ensure the value is correct
+    if m.group(1) == 'byte':
+        variables.append(f'{m.group(2)} DB {m.group(3)}')
+
+    elif m.group(1) == 'short':
+        variables.append(f'{m.group(2)} DW {m.group(3)}')
+
+    elif m.group(1) == 'string':
+        # Analyze scape sequences and trim the quotes
+        ana = m.group(3).strip('"').encode('ascii').decode('unicode_escape')
+        quote_open = False
+        result = ''
+
+        for c in ana:
+            if ord(c) <= 32:
+                # Non-printable
+                if quote_open:
+                    result += '", '
+                    quote_open = False
+                result += str(ord(c))
+                result += ', '
+            else:
+                # Printable
+                if not quote_open:
+                    result += '"'
+                    quote_open = True
+                result += c
+
+        if quote_open:
+            result += '"'
+
+        result += ", '$'"
+        # Now we have our resulting string encoded properly
+        variables.append(f'{m.group(2)} DB {result}')
+
+    elif m.group(1) == 'const':
+        constants.append(m.group(3))
+
+    # We cannot return None
+    return []
+
+
 # Get the regex and their functions and pair them together
 g = globals().copy()
 regex_getis = [(g[f'r{s}'], g[f'r{s}_geti'])
@@ -239,6 +301,7 @@ def parse(source):
 
             m = regex.search(line)
             if m:
+                print(line, '\t\t', regex)
                 ok = True
                 compiled.add(geti(m))
                 break
@@ -265,48 +328,35 @@ compiled = parse(source)
 
 if compiled:
     with open('result.asm', 'w') as f:
-        f.write('''data segment
+        f.write('data segment\n')
+        for v in variables:
+            f.write('    ')
+            f.write(v)
+            f.write('\n')
+        f.write('ends\n')
 
-ends
 
-stack segment
-    dw   128  dup(0)
-ends
+        f.write('stack segment\n')
+        f.write('    dw   128 dup(0)\n')
+        f.write('ends\n')
 
-code segment
-start:
-''')
-        
+
+        f.write('code segment\n')
+        f.write('start:\n')
         for c in compiled:
             if c[-1] != ':':
                 f.write('    ')
 
+            # TODO Replace constants
             f.write(c)
             f.write('\n')
-        
-        f.write('''mov ax, 4c00h
-int 21h  
 
-ends
+        f.write('\n')
+        f.write('    mov ax, 4c00h\n')
+        f.write('    int 21h\n')
+        f.write('ends\n')
 
-end start''')
+        f.write('end start\n')
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    print('The following source was parsed successfully:')
+    print(source.strip())
