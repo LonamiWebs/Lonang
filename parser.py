@@ -2,6 +2,7 @@
 
 import re
 from statements import *
+from compiler import Compiler
 
 source = \
 r'''
@@ -44,14 +45,8 @@ dx = myMethod(7, 3)
 '''
 
 
-
-
-
-
-def parse(source):
-    global defining_function
-
-    compiled = strlist()
+def parse(compiler, source):
+    """Parses the given 'source' and stores the state on 'compiler'"""
     in_comment = False
     for i, line in enumerate(source.split('\n')):
         # Multiline comments
@@ -69,19 +64,16 @@ def parse(source):
         line = line.strip()
         if not line:
             continue
-        
+
         ok = False
         for regex, geti in regex_getis:
             m = regex.match(line)
             if m:
                 ok = True
-
-                # We might need to add the code to the function being defined
-                if defining_function:
-                    defining_function.add(geti(m))
-                else:
-                    compiled.add(geti(m))
-
+                # TODO Rename "geti" since it doesn't anymore
+                #      get any instruction but rather uses the
+                #      compiler to add the code to it
+                geti(compiler, m)
                 break
 
         if ok:
@@ -89,84 +81,74 @@ def parse(source):
 
         # Special case for the closing brace
         if '}' in line:
-            try:
-                popped = closing_braces.pop()
-                if popped == FunctionEnd:
-                    # Defining the function ended, so clear its state
-                    defining_function = None
-                else:
-                    # TODO Nicer way to handle where I should insert...
-                    if defining_function:
-                        defining_function.add(popped)
-                    else:
-                        compiled.add(popped)
-
-            except IndexError:
-                print(f'ERROR: Non-matching closing brace at line {i+1}')
-                return None
+            # TODO Try except here, return None?
+            #      f'ERROR: Non-matching closing brace at line {i+1}'
+            compiler.close_block()
         else:
             # Unknown line, error and early exit
             print(f'ERROR: Unknown statement at line {i+1}:\n    {line}')
-            return None
+            return
 
-    return compiled
-
-
-compiled = parse(source)
-
-if compiled:
-    with open('result.asm', 'w') as f:
-        f.write('data segment\n')
-        for v in variables:
-            f.write('    ')
-            f.write(v)
-            f.write('\n')
-        f.write('ends\n')
+    # Done!
+    pass
 
 
-        f.write('stack segment\n')
-        f.write('    dw   128 dup(0)\n')
-        f.write('ends\n')
+# TODO Yes, it's more like CompilerState
+compiler = Compiler()
+parse(compiler, source)
 
 
-        f.write('code segment\n')
-        # Define the functions
-        for function in functions:
-            f.write(f'  {function.name} PROC\n')
-            for c in function.code:
-                if c[-1] != ':':
-                    f.write('    ')
+# TODO Compiler should have something to tell its OK state
+# if ok:
+with open('result.asm', 'w') as f:
+    f.write('data segment\n')
+    for v in compiler.variables:
+        f.write('    ')
+        f.write(v)
+        f.write('\n')
+    f.write('ends\n')
 
-                # Replace constants
-                for constant, value in constants:
-                    c = constant.sub(value, c)
 
-                f.write(c)
-                f.write('\n')
+    f.write('stack segment\n')
+    f.write('    dw   128 dup(0)\n')
+    f.write('ends\n')
 
-            # All code for the function has been written, return
-            f.write(f'    ret\n')
-            f.write(f'  {function.name} ENDP\n\n')
 
-        # Write the entry point for the program
-        f.write('start:\n')
-        for c in compiled:
+    f.write('code segment\n')
+    # Define the functions
+    for function in compiler.functions:
+        f.write(f'  {function.name} PROC\n')
+        for c in function.code:
             if c[-1] != ':':
                 f.write('    ')
 
-            # Replace constants
-            for constant, value in constants:
-                c = constant.sub(value, c)
-
-            f.write(c)
+            # Replace constants and write
+            f.write(compiler.apply_constants(c))
             f.write('\n')
 
+        # All code for the function has been written, return
+        f.write(f'    ret\n')
+        f.write(f'  {function.name} ENDP\n\n')
+
+    # Write the entry point for the program
+    f.write('start:\n')
+    for c in compiler.code:
+        if c[-1] != ':':
+            f.write('    ')
+
+        # Replace constants
+        for constant, value in compiler.constants:
+            c = constant.sub(value, c)
+
+        f.write(c)
         f.write('\n')
-        f.write('    mov ax, 4c00h\n')
-        f.write('    int 21h\n')
-        f.write('ends\n')
 
-        f.write('end start\n')
+    f.write('\n')
+    f.write('    mov ax, 4c00h\n')
+    f.write('    int 21h\n')
+    f.write('ends\n')
 
-    print('The following source was parsed successfully:')
-    print(source.strip())
+    f.write('end start\n')
+
+print('The following source was parsed successfully:')
+print(source.strip())
