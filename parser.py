@@ -15,6 +15,12 @@ byte little = 24
 string mystr = "Hello\r\nworld!"
 const VALUE = 'L' ; L value!
 
+function myMethod(ax, bx, number) returns number {
+    repeat bx with cx {
+        number += ax
+    }
+}
+
 ax = 4
 bx = 6
 ax += bx
@@ -32,7 +38,7 @@ repeat 10 with cx { @primerLoop
     ax += 1
 }
 
-
+dx = myMethod(7, 3)
 
 '''
 
@@ -69,6 +75,26 @@ repeat 10 with cx { @primerLoop
 #
 #   Constants to be replaced in time:
 #     const myconst = 0x7FFF
+#
+#   Functions can be defined BEFORE USED as follows:
+#     function somename(ax, variable) {
+#
+#     }
+#
+#     function somename(ax, variable) returns bx {
+#
+#     }
+#
+#   The 'returns' part specifies where the returned value is.
+#   Any register or variable can be passed as parameters.
+#
+#   The result will be optimized if the assignement matches
+#   the return value, i.e. assuming 'somename' returning to 'bx':
+#     bx = somename(7, 42)
+#
+#   Will be optimized with no more moves involved.
+#   Same applies when passing matching registers as parameters.
+#
 
 # Utilities
 class strlist(list):
@@ -118,12 +144,15 @@ def recompile(string):
     """Used to compile "readable" regexes, with the following changes:
         '^' and '$' will be prepended and appended
 
+        'VALUE' will be replaced with '[\w\d]+' to match registers/numbers
+
         ' ' (one space) will be replaced with r'\s*'
         '  ' (two spaces) will be replaced with r'\s+'
 
         '(?:\s*@(\w+))?' will be added to the end to allow @labelname
     """
-    sanitized = string.replace('  ', r'\s+').replace(' ', r'\s*')
+    sanitized = string.replace('VALUE', r'[\w\d]+')
+    sanitized = sanitized.replace('  ', r'\s+').replace(' ', r'\s*')
     sanitized = sanitized + r'(?:\s*@(\w+))?'
     return re.compile('^' + sanitized + '$')
 
@@ -131,15 +160,17 @@ def recompile(string):
 # List of all "'r' + statement" paired with "'r' + statement + '_geti'"
 available_statements = [
     'assign', 'add', 'if', 'else', 'repeat',
-    'variable'
+    'functiondef', 'functioncall', 'variable'
 ]
 
 # Used to determine the statement
-rassign = recompile(r'(\w+) = ([\w\d]+)')
-radd = recompile(r'(\w+) \+= ([\w\d]+)')
-rif = recompile(r'if  (\w+) ([<>=!]+) ([\w\d]+) {')
+rassign = recompile(r'(\w+) = (VALUE)')
+radd = recompile(r'(\w+) \+= (VALUE)')
+rif = recompile(r'if  (\w+) ([<>=!]+) (VALUE) {')
 relse = recompile(r'} else {')
-rrepeat = recompile(r'repeat  ([\w\d]+)  with  (\w+) {')
+rrepeat = recompile(r'repeat  (VALUE)  with  (\w+) {')
+rfunctiondef = recompile(r'function (\w+)\(([\w, ]+)\)(?: returns (\w+))? {')
+rfunctioncall = recompile(r'(?:(\w+) = )?\w+\(([\w, ]+)\)')
 
 rvariable = recompile(r'''(byte|short|string|const)  (\w+) = (.+)''')
 
@@ -290,6 +321,14 @@ def rvariable_geti(m):
         constants.append((r, m.group(3)))
 
     return None
+
+
+def rfunctiondef_geti(m):
+    return NotImplemented
+
+
+def rfunctioncall_geti(m):
+    return NotImplemented
 
 
 # Get the regex and their functions and pair them together
