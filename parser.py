@@ -128,6 +128,27 @@ closing_braces = []
 variables = []
 constants = []
 
+# Declared functions available to use
+functions = []
+class Function():
+    def __init__(self, m):
+        self.name = m.group(1)
+        self.params = [p.strip() for p in m.group(2).split(',')]
+        self.returns = m.group(3)
+        self.code = strlist()
+
+    def add(self, values):
+        self.code.add(values)
+
+
+class FunctionEnd():
+    """Dummy special value when popping a closed brace"""
+
+
+# Used when compiling, we need to know whether we push
+# the code to the compiled code or to a function
+defining_function = None
+
 # Compare To Opposite jump Instruction
 ctoi = {
     '<': 'jge',
@@ -324,7 +345,13 @@ def rvariable_geti(m):
 
 
 def rfunctiondef_geti(m):
-    return NotImplemented
+    global defining_function
+    defining_function = Function(m)
+    functions.append(defining_function)
+
+    # Or popping() at the end of the function would fail
+    closing_braces.append(FunctionEnd)
+    return None
 
 
 def rfunctioncall_geti(m):
@@ -338,6 +365,8 @@ regex_getis = [(g[f'r{s}'], g[f'r{s}_geti'])
 
 
 def parse(source):
+    global defining_function
+
     compiled = strlist()
     in_comment = False
     for i, line in enumerate(source.split('\n')):
@@ -359,13 +388,16 @@ def parse(source):
         
         ok = False
         for regex, geti in regex_getis:
-            if not geti:
-                continue
-
             m = regex.match(line)
             if m:
                 ok = True
-                compiled.add(geti(m))
+
+                # We might need to add the code to the function being defined
+                if defining_function:
+                    defining_function.add(geti(m))
+                else:
+                    compiled.add(geti(m))
+
                 break
 
         if ok:
@@ -374,7 +406,17 @@ def parse(source):
         # Special case for the closing brace
         if '}' in line:
             try:
-                compiled.add(closing_braces.pop())
+                popped = closing_braces.pop()
+                if popped == FunctionEnd:
+                    # Defining the function ended, so clear its state
+                    defining_function = None
+                else:
+                    # TODO Nicer way to handle where I should insert...
+                    if defining_function:
+                        defining_function.add(popped)
+                    else:
+                        compiled.add(popped)
+
             except IndexError:
                 print(f'ERROR: Non-matching closing brace at line {i+1}')
                 return None
@@ -404,6 +446,25 @@ if compiled:
 
 
         f.write('code segment\n')
+        # Define the functions
+        for function in functions:
+            f.write(f'  {function.name} PROC\n')
+            for c in function.code:
+                if c[-1] != ':':
+                    f.write('    ')
+
+                # Replace constants
+                for constant, value in constants:
+                    c = constant.sub(value, c)
+
+                f.write(c)
+                f.write('\n')
+
+            # All code for the function has been written, return
+            f.write(f'    ret\n')
+            f.write(f'  {function.name} ENDP\n\n')
+
+        # Write the entry point for the program
         f.write('start:\n')
         for c in compiled:
             if c[-1] != ':':
