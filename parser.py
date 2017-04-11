@@ -116,6 +116,8 @@ ctoi = {
 # Small utility to build more readable regexes
 def recompile(string):
     """Used to compile "readable" regexes, with the following changes:
+        '^' and '$' will be prepended and appended
+
         ' ' (one space) will be replaced with r'\s*'
         '  ' (two spaces) will be replaced with r'\s+'
 
@@ -123,7 +125,7 @@ def recompile(string):
     """
     sanitized = string.replace('  ', r'\s+').replace(' ', r'\s*')
     sanitized = sanitized + r'(?:\s*@(\w+))?'
-    return re.compile(sanitized)
+    return re.compile('^' + sanitized + '$')
 
 
 # List of all "'r' + statement" paired with "'r' + statement + '_geti'"
@@ -139,7 +141,7 @@ rif = recompile(r'if  (\w+) ([<>=!]+) ([\w\d]+) {')
 relse = recompile(r'} else {')
 rrepeat = recompile(r'repeat  ([\w\d]+)  with  (\w+) {')
 
-rvariable = recompile(r'''(byte|short|string|const)  (\w+) = ([\w\d"', \\]+)''')
+rvariable = recompile(r'''(byte|short|string|const)  (\w+) = (.+)''')
 
 
 def helperassign(dst, src):
@@ -321,12 +323,12 @@ def parse(source):
             if not geti:
                 continue
 
-            m = regex.search(line)
+            m = regex.match(line)
             if m:
                 ok = True
                 compiled.add(geti(m))
                 break
-        
+
         if ok:
             continue
 
