@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lonang 8086 Compiler</title>
+    <style>
+    body {
+        background: #eee;
+    }
+    #main {
+        background: #fff;
+        width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        margin-radius: 2px;
+    }
+    pre {
+        background: #222;
+        color: #fff;
+        font-family: monospace;
+        padding: 8px 24px;
+    }
+    #goup {
+        position: fixed;
+        background: #bff;
+        padding: 16px;
+        right: 40px;
+        bottom: 40px;
+        text-align: center;
+        border-radius: 4px;
+    }
+    </style>
+</head>
+<body>
+<span id="goup">
+    <a href="#index">Back to<br />the index</a>
+</span>
+<div id="main">
+    <h1>Lonang 8086 Compiler</h1>
+    <p>This document describes the basic usage of the <b>Lonang 8086</b>.
+    This language is a C++ like language which is used to generate
+    <i>8086 assembly</i> executable code.</p>
+    
+    <h2 id="index">Index</h2>
+    <ul>
+        <li><a href="#general">General</a></li>
+        <li><a href="#variables">Variables</a></li>
+        <li><a href="#comments">Comments</a></li>
+        <li>
+            <a href="#control-flow">Control flow</a>
+            <ul>
+                <li><a href="#if-else-statements">If-else statements</a></li>
+                <li><a href="#repeat-loop">Repeat loop</a></li>
+            </ul>
+        </li>
+        <li><a href="#functions">Functions</a></li>
+    </ul>
+    
+    <h2 id="general">General</h2>
+    <p>Only <b>one</b> statement per line is allowed, since the statement
+    separator used is the new line character.</p>
+    
+    <h2 id="variables">Variables</h2>
+    <p>Variables can be defined anywhere in the code, although it is
+    recommended to define them at the <i>top</i> of the file. Currently
+    the types supported are:</p>
+    <ul>
+        <li><b>byte</b>: Defines a 8-bit integer value.</li>
+        <li><b>short</b>: Defines a 16-bit integer value.</li>
+        <li><b>string</b>: Defines a string variable (sequence of bytes).</li>
+        <li><b>const</b>: Defines a constant value, replaced on compile time.</li>
+    </ul>
+    <p>The <b>string</b> type <b>must</b> be ASCII values, and escape sequences
+    are supported, such as <i>\r\n</i> for new line, <i>\t</i> for TAB, etc.</p>
+    
+    <p>Some examples are shown below:</p>
+<pre>
+byte mybyte = 0x7F
+short myint = 0x7FFF
+string str = "Some string...\r\n"
+
+const VALUE = 0x7FFF
+</pre>
+    
+    <h2 id="comments">Comments</h2>
+    <p>Inline comments can be specified after the statement, separated by
+    the semicolon character '<i>;</i>'. Multiline comments can also be made,
+    these being composed of a starting and an ending semicolon alone:</p>
+<pre>
+;
+; This comment is multiline
+; The starting semicolon here is optional
+  It can be omitted too
+  As shown here
+;
+
+byte value = 42 ; Inlined comment
+</pre>
+    
+    <h2 id="control-flow">Control flow</h2>
+    <h3 id="if-else-statements">If-else statements</h3>
+    <p>Conditional blocks allow to execute a piece of code if a criteria is met.
+    It is also possible to execute a different piece of code if that initial
+    condition is not met, although this is optional. The braces <b>must</b>
+    be on the same line as the statements</p>
+    
+    <p>It is possible to optionally label <i>if</i> and <i>else</i> statements
+    by appending <b>@labelName</b> to the end, before any comments. This will
+    result in different label names on the generated assembly code. When
+    omitted, a unique ID will be used.</p>
+    
+    <p>The supported operators for use on conditional expressions are:</p>
+    <ul>
+        <li><b>==</b>. Met when both sides are equal.</li>
+        <li><b>!=</b>. Met when both sides are different.</li>
+        <li><b>&lt;</b>. Met when the left side is less than the right side.</li>
+        <li><b>&gt;</b>. Met when the left side is greater than the right side.</li>
+        <li><b>&lt;=</b>. Met when the left side is less or equal to the right side.</li>
+        <li><b>&gt;=</b>. Met when the left side is greater or equal to the right side.</li>
+    </ul>
+    
+    <p>As an example:</p>
+<pre>
+if ax &lt; bx { @myFirstIf
+    ;
+    ; code to execute when 'ax &lt; bx'
+    ;
+} else { @myFirstElse
+    ;
+    ; code to execute when 'ax &gt;= bx'
+    ;
+}
+</pre>
+    
+    <h3 id="repeat-loop">Repeat loop</h3>
+    <p>The <b>repeat</b> loop can be used to repeat a specific part of the code
+    a <i>n</i> amount of times. Its syntax is defined as follows:</p>
+    
+<pre>
+repeat <i>n</i> with <i>var</i> {
+    ;
+    ; code to repeat <i>n</i> times
+    ;
+}
+</pre>
+    
+    <p>This statement can also be labeled. The reason why the <i>with</i> part
+    is explicit is because it implies that <i>var</i> will be used to count
+    down <i>n</i> times until <i>0</i> is reached.</p>
+    
+    <p>The possible values for <b>n</b> are either a decimal number (can also
+    be expressed in either hexadecimal or binary, with the <i>h</i> or <i>b</i>
+    suffix, defaults to decimal), a register or a variable.</p>
+    
+    <p>The possible values for <b>var</b> are either a register or a variable.
+    Certain optimizations will be made if the register used is <b>cx</b>:</p>
+    
+<pre>
+; Multiplication with repeated sums
+ax = 0
+repeat 3 with cx { @myLoop
+    ax += 2
+}
+</pre>
+
+    <h2 id="functions">Functions</h2>
+    <p>Functions <b>must</b> be declared at the top of the file, since
+    their signature has to be known beforehand to determine whether a call
+    to them is legal or not.</p>
+    
+    <p>Functions are defined by the <b>function</b> keyword, followed by
+    the function name to be used. After this, a list of comma separated
+    registers or variables must be specified insides parenthesis. Optionally,
+    one can use the <b>returns</b> keyword to determine where the returned
+    value will be passed. If omitted, the function will be considered to
+    return nothing. These can also be labeled.</p>
+    
+<pre>
+function multiply(ax, bx) returns dx {
+    dx = 0
+    if ax &lt; bx {
+        repeat ax with cx {
+            dx += bx
+        }
+    } else {
+        repeat bx with cx {
+            dx += ax
+        }
+    }
+}
+</pre>
+
+    <p>To call this function, one can first specify to which variable
+    or register the result will be assigned. This will be ilegal when the
+    function returns no values:</p>
+<pre>
+dx = multiply(7, 5)
+</pre>
+    
+    <p>Optimization will be made if the arguments passed match the
+    original parameters list, and so will the resulting assignment.
+    In the example above, no copying will be made from <i>dx</i> to <i>dx</i>
+    since they're the same. If one were to call:
+<pre>
+ax = 7
+bx = 5
+dx = multiply(bx, ax)
+</pre>
+    
+    <p>It would <b>fail</b> since <i>ax</i> would get the value of <i>bx</i>,
+    thus losing the original value before assigning it to <i>bx</i>.
+    <!-- TODO This should probably be fixed actually -->
+</div>
+</body>
+</html>

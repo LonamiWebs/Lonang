@@ -42,60 +42,6 @@ dx = myMethod(7, 3)
 
 '''
 
-# Specification:
-#   After the instructions, comments can be written starting with ';'
-#   Multiline comments can be specified as follows:
-#     ;
-#     Everything here will be a comment
-#     It can expand accross multiple lines
-#     ;
-#
-#   Only one statement per line
-#   Conditionals are, for instance:
-#     if condition {
-#       code
-#     } else {
-#       code
-#     }
-#
-#   The braces MUST be in the same line.
-#   To label a part, use @label at the end
-#
-#   Loops, for instance:
-#     repeat ax with cx {
-#       code
-#     }
-#
-#   This makes it explicit that cx will be used although any other can
-#
-#   It is possible to define variables as follows:
-#     byte mybyte = 0x7F
-#     short myint = 0x7FFF
-#     string str = "Some string...\r\n"
-#
-#   Constants to be replaced in time:
-#     const myconst = 0x7FFF
-#
-#   Functions can be defined BEFORE USED as follows:
-#     function somename(ax, variable) {
-#
-#     }
-#
-#     function somename(ax, variable) returns bx {
-#
-#     }
-#
-#   The 'returns' part specifies where the returned value is.
-#   Any register or variable can be passed as parameters.
-#
-#   The result will be optimized if the assignement matches
-#   the return value, i.e. assuming 'somename' returning to 'bx':
-#     bx = somename(7, 42)
-#
-#   Will be optimized with no more moves involved.
-#   Same applies when passing matching registers as parameters.
-#
-
 # Utilities
 class strlist(list):
     def add(self, values):
