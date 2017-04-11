@@ -100,6 +100,9 @@ dx = myMethod(7, 3)
 class strlist(list):
     def add(self, values):
         """Extends or appends the string value(s)"""
+        if values is None:
+            return
+
         if isinstance(values, str):
             self.append(values)
         elif isinstance(values, list):
