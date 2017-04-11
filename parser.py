@@ -5,10 +5,15 @@ import re
 source = \
 r'''
 
+;
+; This is a comment.
+; Accross many lines
+;
+
 short number = 4242
 byte little = 24
 string mystr = "Hello\r\nworld!"
-const VALUE = 'L'
+const VALUE = 'L' ; L value!
 
 ax = 4
 bx = 6
@@ -32,9 +37,12 @@ repeat 10 with cx { @primerLoop
 '''
 
 # Specification:
-#   After the instructions, comments can be written,
-#   although it's recommended to mark their start with
-#   something like '; comment'
+#   After the instructions, comments can be written starting with ';'
+#   Multiline comments can be specified as follows:
+#     ;
+#     Everything here will be a comment
+#     It can expand accross multiple lines
+#     ;
 #
 #   Only one statement per line
 #   Conditionals are, for instance:
@@ -279,8 +287,7 @@ def rvariable_geti(m):
         r = re.compile(fr'\b{m.group(2)}\b')
         constants.append((r, m.group(3)))
 
-    # We cannot return None
-    return []
+    return None
 
 
 # Get the regex and their functions and pair them together
@@ -291,7 +298,20 @@ regex_getis = [(g[f'r{s}'], g[f'r{s}_geti'])
 
 def parse(source):
     compiled = strlist()
+    in_comment = False
     for i, line in enumerate(source.split('\n')):
+        # Multiline comments
+        if line == ';':
+            # Toggle
+            in_comment = not in_comment
+        if in_comment:
+            # Ignore this line
+            continue
+
+        # Delete everything after the semicolon (inline comment)
+        if ';' in line:
+            line = line[:line.index(';')]
+
         line = line.strip()
         if not line:
             continue
@@ -303,7 +323,6 @@ def parse(source):
 
             m = regex.search(line)
             if m:
-                print(line, '\t\t', regex)
                 ok = True
                 compiled.add(geti(m))
                 break
