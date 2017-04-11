@@ -15,7 +15,7 @@ byte little = 24
 string mystr = "Hello\r\nworld!"
 const VALUE = 'L' ; L value!
 
-function myMethod(ax, bx, number) returns number {
+function myMethod(ax, bx) returns number {
     repeat bx with cx {
         number += ax
     }
@@ -30,7 +30,7 @@ if bx == 6 { @primerIf
 }
 
 bx = 0
-repeat 10 with cx { @primerLoop
+repeat 2 with cx { @primerLoop
     if ax < 10 {
         bx += 1
     }
@@ -135,10 +135,26 @@ constants = []
 functions = []
 class Function():
     def __init__(self, m):
+        # Name of the function
         self.name = m.group(1)
-        self.params = [p.strip() for p in m.group(2).split(',')]
+
+        # Parameter names used
+        self.params = self.get_params(m.group(2))
+
+        # Where the value is returned
         self.returns = m.group(3)
+
+        # Used to store the code of the function
         self.code = strlist()
+
+    @staticmethod
+    def get_params(string):
+        """Converts a comma separated items string into a list of items"""
+        string = string.strip()
+        if string:
+            return [p.strip() for p in string.split(',')]
+        else:
+            return []
 
     def add(self, values):
         self.code.add(values)
@@ -194,7 +210,7 @@ rif = recompile(r'if  (\w+) ([<>=!]+) (VALUE) {')
 relse = recompile(r'} else {')
 rrepeat = recompile(r'repeat  (VALUE)  with  (\w+) {')
 rfunctiondef = recompile(r'function (\w+)\(([\w, ]+)\)(?: returns (\w+))? {')
-rfunctioncall = recompile(r'(?:(\w+) = )?\w+\(([\w, ]+)\)')
+rfunctioncall = recompile(r'(?:(\w+) = )?(\w+)\(([\w, ]+)\)')
 
 rvariable = recompile(r'''(byte|short|string|const)  (\w+) = (.+)''')
 
@@ -358,7 +374,45 @@ def rfunctiondef_geti(m):
 
 
 def rfunctioncall_geti(m):
-    return NotImplemented
+    assigned_to = m.group(1)
+    name = m.group(2)
+    params = Function.get_params(m.group(3))
+
+    # Find the function
+    function = None
+    for f in functions:
+        # The argument count and name must match
+        if f.name == name and len(f.params) == len(params):
+            # If we don't assign the result, or we do but it's
+            # okay because the function returns something
+            if assigned_to is None or f.returns is not None:
+                # Then assign we've found our function
+                function = f
+                break
+
+    if function is None:
+        raise ValueError(
+            f'No function called {name} with {len(params)} argument(s) exists')
+
+    # Resulting code
+    result = []
+
+    # We have a function, now copy the parameters if required
+    for caller_p, func_p in zip(params, function.params):
+        if caller_p != func_p:
+            # Caller parameter and function parameter differs, we need to move
+            result.append(helperassign(func_p, caller_p))
+
+    # Parameters are ready, call the function
+    result.append(f'call {name}')
+
+    # Copy the result back if it differs from where the function stored it
+    if assigned_to is not None and function.returns != assigned_to:
+        result.append(helperassign(assigned_to, function.returns))
+
+    # We now copied the arguments correctly,
+    # call the function and assign the result
+    return result
 
 
 # Get the regex and their functions and pair them together
