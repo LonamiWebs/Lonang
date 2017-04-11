@@ -1,88 +1,105 @@
 import re
-from functions import FunctionEnd
+from statements import *
+from compiler_state import CompilerState
 
 
-# TODO Should probably be called "CompilerState"
 class Compiler:
+    """Lonang 8086 compiler"""
     def __init__(self):
-        self.uid = 0
+        self.state = CompilerState()
 
-        # Declared variables, constants and function headers
-        self.variables = []
-        self.constants = []
-        self.functions = []
+    def update_state(self, source):
+        """Updates the compiler state with the given source"""
+        # TODO No corrupt state will be told although it can happen
+        in_comment = False
+        for i, line in enumerate(source.split('\n')):
+            # Multiline comments
+            if line == ';':
+                # Toggle
+                in_comment = not in_comment
+            if in_comment:
+                # Ignore this line
+                continue
 
-        # Parsed code
-        self.code = []
+            # Delete everything after the semicolon (inline comment)
+            if ';' in line:
+                line = line[:line.index(';')]
 
-        # Pending code will be added once a closing brace is found
-        self.pending_code = []
-        
-        # Determines the function currently being defined
-        self.defining_function = None
+            line = line.strip()
+            if not line:
+                continue
 
-    def get_uid(self, default=None):
-        """Returns a unique identifier unless
-            a 'default' name is given
-        """
-        if default:
-            return default
-        
-        result = f'_uid_{self.uid}'
-        self.uid += 1
-        return result
+            ok = False
+            for regex, geti in regex_getis:
+                m = regex.match(line)
+                if m:
+                    ok = True
+                    # TODO Rename "geti" since it doesn't anymore
+                    #      get any instruction but rather uses the
+                    #      compiler state to add the code to it
+                    geti(self.state, m)
+                    break
 
-    def add_code(self, *values):
-        """Extends the code with the given values"""
-        if self.defining_function is None:
-            self.code.extend(values)
-        else:
-            self.defining_function.add_code(*values)
+            if ok:
+                continue
 
-    def add_pending_code(self, values):
-        """Appends the given value(s) to the pending code,
-            added when a closing brace is found"""
-        # Append, don't extend, since we might pop many at once
-        self.pending_code.append(values)
-
-    def add_variable(self, code):
-        """Appends the given code for declaring a variable"""
-        self.variables.append(code)
-
-    def add_constant(self, name, replacement):
-        """Adds a new constant with the given name and the specified value"""
-        regex = re.compile(fr'\b{name}\b')
-        self.constants.append((regex, replacement))
-    
-    def apply_constants(self, code):
-        """Applies the available constants to the given line of code"""
-        for constant, value in self.constants:
-            code = constant.sub(value, code)
-        
-        return code
-    
-    def begin_function(self, function):
-        """Begins a function definition. Subsequent 'add_code' calls
-            will add the code to the function body and not the main code
-        """
-        self.functions.append(function)
-        self.defining_function = function
-        
-        # Used when popping pending code to determine when it ends
-        self.add_pending_code(FunctionEnd)
-
-    def close_block(self):
-        """Closes a block of code, consuming one of
-            the pending code saved instructions"""
-
-        popped = self.pending_code.pop()
-        if popped == FunctionEnd:
-            # Defining the function ended, so clear its state
-            self.defining_function = None
-        else:
-            if isinstance(popped, str):
-                self.add_code(popped)
+            # Special case for the closing brace
+            if '}' in line:
+                # TODO Try except here, return None?
+                #      f'ERROR: Non-matching closing brace at line {i+1}'
+                self.state.close_block()
             else:
-                self.add_code(*popped)
+                # Unknown line, error and early exit
+                print(f'ERROR: Unknown statement at line {i+1}:\n    {line}')
+                return
+
+    def write(self, f):
+        """Writes the current state to the given 'output' stream"""
+        f.write('data segment\n')
+        for v in self.state.variables:
+            f.write('    ')
+            f.write(v)
+            f.write('\n')
+        f.write('ends\n')
 
 
+        f.write('stack segment\n')
+        f.write('    dw   128 dup(0)\n')
+        f.write('ends\n')
+
+
+        f.write('code segment\n')
+        # Define the functions
+        for function in self.state.functions:
+            f.write(f'  {function.name} PROC\n')
+            for c in function.code:
+                if c[-1] != ':':
+                    f.write('    ')
+
+                # Replace constants and write
+                f.write(self.state.apply_constants(c))
+                f.write('\n')
+
+            # All code for the function has been written, return
+            f.write(f'    ret\n')
+            f.write(f'  {function.name} ENDP\n\n')
+
+        # Write the entry point for the program
+        f.write('start:\n')
+        for c in self.state.code:
+            if c[-1] != ':':
+                f.write('    ')
+
+            # Replace constants
+            for constant, value in self.state.constants:
+                c = constant.sub(value, c)
+
+            f.write(c)
+            f.write('\n')
+
+        f.write('\n')
+        f.write('    mov ax, 4c00h\n')
+        f.write('    int 21h\n')
+        f.write('ends\n')
+
+        f.write('end start\n')
