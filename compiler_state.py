@@ -67,6 +67,20 @@ class CompilerState:
 
         return code
 
+    def find_matching_function(self, name, param_count, must_return):
+        """Finds and returns the function definition which
+            matches with the given 'name' and parameter count.
+
+            If 'must_return' is True, then the function must also
+            return some value to be valid
+        """
+        for f in self.functions:
+            if f.name == name and len(f.params) == param_count:
+                if must_return and f.returns is not None:
+                    return f
+
+        return None
+
     def begin_function(self, function):
         """Begins a function definition. Subsequent 'add_code' calls
             will add the code to the function body and not the main code
@@ -79,9 +93,14 @@ class CompilerState:
 
     def close_block(self):
         """Closes a block of code, consuming one of
-            the pending code saved instructions"""
+            the pending code saved instructions.
 
-        popped = self.pending_code.pop()
+            Returns True if the block was successfully closed"""
+        try:
+            popped = self.pending_code.pop()
+        except IndexError:
+            return False
+
         if popped == FunctionEnd:
             # Defining the function ended, so clear its state
             self.defining_function = None
@@ -90,3 +109,5 @@ class CompilerState:
                 self.add_code(popped)
             else:
                 self.add_code(*popped)
+
+        return True

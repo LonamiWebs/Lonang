@@ -37,9 +37,9 @@ class Compiler:
 
             # Special case for the closing brace
             if '}' in line:
-                # TODO Try except here, return None?
-                #      f'ERROR: Non-matching closing brace at line {i+1}'
-                self.state.close_block()
+                if not self.state.close_block():
+                    print(f'ERROR: Non-matching closing brace at line {i+1}')
+                    return
             else:
                 # Unknown line, error and early exit
                 print(f'ERROR: Unknown statement at line {i+1}:\n    {line}')
