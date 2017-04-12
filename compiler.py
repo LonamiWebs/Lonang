@@ -8,6 +8,9 @@ class Compiler:
     def __init__(self):
         self.state = CompilerState()
 
+        # TODO Load Statement's
+        self.statements = []
+
     def update_state(self, source):
         """Updates the compiler state with the given source"""
         # TODO No corrupt state will be told although it can happen
@@ -29,18 +32,11 @@ class Compiler:
             if not line:
                 continue
 
-            ok = False
-            for regex, geti in regex_getis:
-                m = regex.match(line)
-                if m:
-                    ok = True
-                    # TODO Rename "geti" since it doesn't anymore
-                    #      get any instruction but rather uses the
-                    #      compiler state to add the code to it
-                    geti(self.state, m)
-                    break
-
-            if ok:
+            if any(s.update_if_match(line, self.state)
+                   for s in self.statements):
+                # One statement successfully matched the line and updated
+                # the compiler state, so continue to the next iteration.
+                # Since any() will stop on the first match, it's safe to use
                 continue
 
             # Special case for the closing brace
