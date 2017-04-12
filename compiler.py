@@ -1,5 +1,5 @@
 import re
-from statements import *
+from statements import statements
 from compiler_state import CompilerState
 
 
@@ -7,9 +7,6 @@ class Compiler:
     """Lonang 8086 compiler"""
     def __init__(self):
         self.state = CompilerState()
-
-        # TODO Load Statement's
-        self.statements = []
 
     def update_state(self, source):
         """Updates the compiler state with the given source"""
@@ -32,8 +29,7 @@ class Compiler:
             if not line:
                 continue
 
-            if any(s.update_if_match(line, self.state)
-                   for s in self.statements):
+            if any(s.update_if_match(line, self.state) for s in statements):
                 # One statement successfully matched the line and updated
                 # the compiler state, so continue to the next iteration.
                 # Since any() will stop on the first match, it's safe to use
