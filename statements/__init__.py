@@ -1,12 +1,5 @@
-# TODO Automatically load all
-from .assign import assign_statement
-from .add import add_statement
-from .if_ import if_statement
-from .else_ import else_statement
-from .repeat import repeat_statement
-from .variable import variable_statement
-from .functiondef import functiondef_statement
-from .functioncall import functioncall_statement
+import os
+from importlib import import_module
 
 ignore = [
     '__init__.py',
@@ -14,13 +7,19 @@ ignore = [
     'statement.py'
 ]
 
-statements = [
-    assign_statement,
-    add_statement,
-    if_statement,
-    else_statement,
-    repeat_statement,
-    variable_statement,
-    functiondef_statement,
-    functioncall_statement
-]
+statements = []
+
+# Iterate over all the files under 'statements' and dynamically load
+# the 'filename_statement' variables in them to find all the statements
+for filename in os.listdir('statements'):
+    if os.path.isdir(filename) or filename in ignore:
+        continue
+
+    name = os.path.splitext(filename)[0]
+    module_name = 'statements.' + name
+    statement_name = name.strip('_') + '_statement'
+
+    # Import the module 'module_name' and get the statement variable
+    statement = getattr(import_module(module_name), statement_name)
+    statements.append(statement)
+
