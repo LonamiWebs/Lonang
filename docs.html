@@ -50,6 +50,7 @@
             <ul>
                 <li><a href="#if-else-statements">If-else statements</a></li>
                 <li><a href="#repeat-loop">Repeat loop</a></li>
+                <li><a href="#while-loop">While loop</a></li>
             </ul>
         </li>
         <li><a href="#functions">Functions</a></li>
@@ -161,6 +162,33 @@ repeat 3 with cx { @myLoop
     ax += 2
 }
 </pre>
+    
+    <h3 id="while-loop">While loop</h3>
+    <p>The <b>while</b> loop can be used to repeat a specific part an indefined
+    amount of times, depending on an arbitrary condition. Once this condition
+    is not met, the loop will end:</p>
+<pre>
+while ax &lt; 10 {
+    ;
+    ; code to repeat <i>while</i> ax &lt; 10
+    ;
+}
+</pre>
+
+    <p>The code will <b>not</b> be executed even once if the condition is
+    not met in the first place (<i>e.g.</i> ax turns out to be &gt;= 10).
+    To solve this, it is possible to specify the loop to execute <b>at least
+    once</b> with the <i>or once</i> modifier:</p>
+<pre>
+ax = 9
+while ax == 10 <b>or once</b> {
+    ax += 1
+}
+</pre>
+
+    <p>The first time the loop will enter thanks to the <i>or once</i> part.
+    In the loop, <i>ax</i> will become 10. Then the loop will repeat because
+    the condition is met, and exit once <i>ax</i> becomes 11.</p>
 
     <h2 id="functions">Functions</h2>
     <p>Functions <b>must</b> be declared at the top of the file, since

@@ -27,9 +27,17 @@ ax += bx
 
 if bx == 6 { @primerIf
     ax = VALUE
+
+    while bx < 9 {
+        bx += 1
+    }
 }
 
 bx = 0
+while bx == 1 or once {
+    bx += 2
+}
+
 repeat 2 with cx { @primerLoop
     if ax < 10 {
         bx += 1
@@ -39,6 +47,7 @@ repeat 2 with cx { @primerLoop
 }
 
 dx = myMethod(7, 3)
+
 '''
 
 

@@ -1,3 +1,13 @@
+# Compare To jump Instruction
+cti = {
+    '<': 'jl',
+    '>': 'jg',
+    '<=': 'jle',
+    '>=': 'jge',
+    '!=': 'jne',
+    '==': 'je'
+}
+
 # Compare To Opposite jump Instruction
 ctoi = {
     '<': 'jge',
