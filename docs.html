@@ -54,6 +54,12 @@
             </ul>
         </li>
         <li><a href="#functions">Functions</a></li>
+        <li>
+            <a href="#builtin-functions">Built-in functions</a>
+            <ul>
+                <li><a href="#divmod">Divmod function</a></li>
+            </ul>
+        </li>
     </ul>
     
     <h2 id="general">General</h2>
@@ -237,6 +243,33 @@ dx = multiply(bx, ax)
     <p>It would <b>fail</b> since <i>ax</i> would get the value of <i>bx</i>,
     thus losing the original value before assigning it to <i>bx</i>.
     <!-- TODO This should probably be fixed actually -->
+
+    <h2 id="builtin-functions">Built-in functions</h2>
+    <p>Built-in functions are called in a similar to how user-defined functions
+    are, although they do <b>not</b> use parenthesis to separate the argument
+    list. Every of these are treated as a different statement.</p>
+
+    <h3 id="divmod">Divmod function</h3>
+    <p>The <b>divmod</b> function can be used to perform both <i>division</i>
+    and the <i>modulo</i> operator (to obtain the remainder). It will calculate
+    both values on dividing the first argument by the second one:</p>
+<pre>
+; Store (ax divided by bx) in ax
+; Store (ax modulo bx) in dx
+ax, dx = divmod ax, bx
+</pre>
+
+    <p>Note that due how this function works and to guarantee that no data is
+    loss, certain parameters may perform worse than others. For instance,
+    calling the function with <i>dx, ax</i> and storing the result in
+    <i>dx, ax</i> too will cause <b>nine</b> generated instructions, while
+    invoking the function with <i>ax, bx</i> and storing the result in
+    <i>ax, dx</i> will cause <b>two</b>, due to how it works.
+    <br />
+    Some of these special worse cases are those which have the divisor in
+    either <i>ax</i> or <i>dx</i> and the result isn't stored on any register
+    or variable different to these, or when the result is neither <i>ax</i> nor
+    <i>dx</i>.</p>
 </div>
 </body>
 </html>

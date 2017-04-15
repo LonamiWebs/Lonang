@@ -22,6 +22,9 @@ ctoi = {
 def helperassign(dst, src):
     """Helper assign with support for assigning 8 bits to 16"""
     # TODO Add support for actually assigning CL/CH to CX (i.e. XOR the rest)
+    if dst == src:
+        return None
+
     return f'mov {dst}, {src}'
 
 
@@ -43,3 +46,14 @@ def parseint(value):
         return int(value)
     except ValueError:
         return None
+
+
+def is_register(name):
+    """Returns True if the given 'name' is a register"""
+    if len(name) != 2:
+        return False
+
+    if name[0] in 'abcd' and name[1] in 'xhl':
+        return True
+
+    return name in ('si', 'di', 'cs', 'ds', 'ss', 'sp', 'bp', 'es')

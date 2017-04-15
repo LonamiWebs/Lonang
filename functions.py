@@ -23,7 +23,7 @@ class Function:
 
     def add_code(self, *values):
         """Extends or appends the string value(s) for the code"""
-        self.code.extend(values)
+        self.code.extend(v for v in values if v is not None)
 
 
 class FunctionEnd():

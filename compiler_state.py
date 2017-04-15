@@ -41,7 +41,7 @@ class CompilerState:
     def add_code(self, *values):
         """Extends the code with the given values"""
         if self.defining_function is None:
-            self.code.extend(values)
+            self.code.extend(v for v in values if v is not None)
         else:
             self.defining_function.add_code(*values)
 
