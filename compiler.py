@@ -78,6 +78,13 @@ class Compiler:
 
         # Write the entry point for the program
         f.write('start:\n')
+
+        # Set up the data segment if variables are used1
+        if self.state.variables:
+            f.write('    mov ax, data\n')
+            f.write('    mov ds, ax\n')
+
+        # Now write the real code part
         for c in self.state.code:
             if c[-1] != ':':
                 f.write('    ')
