@@ -9,7 +9,7 @@ r'''
 ; This is a comment.
 ; Accross many lines
 ;
-;
+
 short number = 4242
 byte little = 24
 string mystr = "Hello\r\nworld!"
@@ -57,11 +57,11 @@ dx = myMethod(7, 3)
 
 ax = gcd(35, 15)
 ax = gcd(211, 173)
-;
 
 ax = 10
 bx = 3
 ax, dx = divmod ax, bx
+
 '''
 
 

@@ -8,7 +8,15 @@ def functiondef(c, m):
             ; code
         }
     """
-    c.begin_function(Function(m))
+    f = Function(m)
+    # Ensure that the function doesn't have repeated parameters
+    for i in range(len(f.params)):
+        for j in range(i + 1, len(f.params)):
+            if f.params[i] == f.params[j]:
+                raise ValueError(f'Parameter "{f.params[i]}" used twice on '
+                                 f'"{f.name}" definition (positions {i+1} '
+                                 f'and {j+1})')
+    c.begin_function(f)
 
 
 functiondef_statement = Statement(

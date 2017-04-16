@@ -240,9 +240,11 @@ bx = 5
 dx = multiply(bx, ax)
 </pre>
     
-    <p>It would <b>fail</b> since <i>ax</i> would get the value of <i>bx</i>,
-    thus losing the original value before assigning it to <i>bx</i>.
-    <!-- TODO This should probably be fixed actually -->
+    <p>The value of <i>ax</i> would have to first get saved, then updated
+    with the right value, and then restoring the saved value into <i>bx</i>,
+    this is, <b>three</b> operations in contrast to no copying at all
+    (assuming that the right registers contain the right values, which
+    may not always be the case).</p>
 
     <h2 id="builtin-functions">Built-in functions</h2>
     <p>Built-in functions are called in a similar to how user-defined functions
