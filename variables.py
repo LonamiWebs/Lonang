@@ -1,8 +1,16 @@
 class Variable:
     def __init__(self, name, vartype, value):
         self.name = name
-        self.type = vartype
         self.value = value.strip()
+
+        # If the type ends with ']' then it probably is a vector
+        self.is_vector = vartype.endswith(']') and '[' in vartype
+        if self.is_vector:
+            vartype, self.length = vartype.split('[')
+            try:
+                self.length = int(self.length[:-1].strip())
+            except ValueError:
+                raise ValueError(f'Unknown length value "{self.length[:-1]}"')
 
         self.is_constant = vartype == 'const'
         if self.is_constant:
@@ -53,7 +61,11 @@ class Variable:
     def to_code(self):
         """Returns the code representation for
             the definition of this variable"""
-        return f'{self.name} {self.typecode} {self.value}'
+        if self.is_vector:
+            # TODO Support for non-duplicate values, thus length inferred
+            return f'{self.name} {self.typecode} {self.length} dup({self.value})'
+        else:
+            return f'{self.name} {self.typecode} {self.value}'
 
     def __str__(self):
         return self.to_code()
