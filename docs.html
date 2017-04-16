@@ -60,6 +60,11 @@
                 <li><a href="#divmod">Divmod function</a></li>
             </ul>
         </li>
+        <li><a href="#basic-io">Basic IO</a></li>
+            <ul>
+                <li><a href="#printf">Printf statement</a></li>
+            </ul>
+        </li>
     </ul>
     
     <h2 id="general">General</h2>
@@ -272,6 +277,33 @@ ax, dx = divmod ax, bx
     either <i>ax</i> or <i>dx</i> and the result isn't stored on any register
     or variable different to these, or when the result is neither <i>ax</i> nor
     <i>dx</i>.</p>
+
+    <h2 id="basic-io">Basic IO</h2>
+    <p>It's possible to perform basic input/output operations using the console
+    as an interface with the user.</p>
+
+    <h3 id="printf">Printf statement</h3>
+    <p>This statement allows to <b>print</b> a possibly <b>f</b>ormatted string
+    to the console. No formatting can be made when printing an already-defined
+    string variable, since special handling is performed to generate a
+    string which allows being formatted.</p>
+
+    <p>After the <i>printf</i> keyword, a variable or a string can be specified.
+    If an inmediate string is specified, it can contain <b>%X</b> where <b>X</b>
+    indicates the type of the variable to be formatted (either a <b>s</b>tring
+    or a <b>d</b>ecimal value), which are later specified in a comma-separated
+    fashion after the <b>%</b> character:</p>
+<pre>string hello = "Hello, world!\r\n"
+string person = "User"
+short favourite = 42
+
+printf hello
+printf "Hello %s! I see you like the number %d" % person, favourite
+printf "\r\nExiting...\r\n"</pre>
+
+    <p>If two subsequent calls were to be made to <code>printf</code>,
+    it's recommended to use <code>printf "%s%s" % str1, str2</code> since
+    furhter optimization will be made.</p>
 </div>
 </body>
 </html>

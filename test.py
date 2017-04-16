@@ -13,6 +13,10 @@ r'''
 short number = 4242
 byte little = 24
 string mystr = "Hello\r\nworld!"
+
+string person = "Lonami"
+string place = "here"
+
 const VALUE = 'L' ; L value!
 
 function myMethod(ax, bx) returns number {
@@ -61,6 +65,8 @@ ax = gcd(211, 173)
 ax = 10
 bx = 3
 ax, dx = divmod ax, bx
+
+printf "%s, hello %s! How come you've came to %s" % place, person, place
 '''
 
 
