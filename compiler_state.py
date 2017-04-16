@@ -52,9 +52,12 @@ class CompilerState:
         # Append, don't extend, since we might pop many at once
         self.pending_code.append(values)
 
-    def add_variable(self, name, code):
-        """Appends the given code for declaring a variable"""
-        self.variables[name] = f'{name} {code}'
+    def add_variable(self, variable):
+        """Appends the given Variable, redefining it if required"""
+        if variable.is_constant:
+            self.add_constant(variable.name, variable.value)
+        else:
+            self.variables[variable.name] = variable
 
     def add_constant(self, name, replacement):
         """Adds a new constant with the given name and the specified value"""

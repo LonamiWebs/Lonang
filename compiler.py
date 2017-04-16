@@ -50,7 +50,7 @@ class Compiler:
         f.write('data segment\n')
         for v in self.state.variables.values():
             f.write('    ')
-            f.write(v)
+            f.write(v.to_code())
             f.write('\n')
         f.write('ends\n')
 
