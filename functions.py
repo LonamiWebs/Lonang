@@ -1,3 +1,6 @@
+import re
+
+
 class Function:
     def __init__(self, m):
         # Name of the function
@@ -5,6 +8,9 @@ class Function:
 
         # Parameter names used
         self.params = self.get_params(m.group(2))
+
+        # Name mangling, add as many underscores as parameter count
+        self.name += '_' * len(self.params)
 
         # Where the value is returned
         self.returns = m.group(3)
@@ -28,3 +34,8 @@ class Function:
 
 class FunctionEnd():
     """Dummy special value when popping a closed brace"""
+
+
+# Underscore not supported must start with a letter
+# TODO This could probably be used on variable names too
+FUNC_NAME_RE = r'[A-Za-z][A-Za-z0-9]*'

@@ -76,7 +76,7 @@ class CompilerState:
             return some value to be valid
         """
         for f in self.functions:
-            if f.name == name and len(f.params) == param_count:
+            if f.name.strip('_') == name and len(f.params) == param_count:
                 if not must_return or f.returns is not None:
                     return f
 

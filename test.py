@@ -61,7 +61,6 @@ ax = gcd(211, 173)
 ax = 10
 bx = 3
 ax, dx = divmod ax, bx
-
 '''
 
 

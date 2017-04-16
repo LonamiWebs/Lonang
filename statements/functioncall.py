@@ -8,12 +8,11 @@ def functioncall(c, m):
         dx = someMethod(8)
     """
     assigned_to = m.group(1)
-    name = m.group(2)
     params = Function.get_params(m.group(3))
 
     # Find the function
     function = c.find_matching_function(
-        name=name,
+        name=m.group(2),
         param_count=len(params),
         must_return=assigned_to is not None
     )
@@ -60,10 +59,10 @@ def functioncall(c, m):
     #      whereas the helperassign() would, in theory, support this
     #
     # Parameters are ready, call the function
-    c.add_code(f'call {name}')
+    c.add_code(f'call {function.name}')
 
-    # Copy the result back if it differs from where the function stored it
-    if assigned_to is not None and function.returns != assigned_to:
+    # Copy the result back if required
+    if assigned_to is not None:
         c.add_code(helperassign(assigned_to, function.returns))
 
 

@@ -1,5 +1,5 @@
 from .statement import Statement
-from functions import Function
+from functions import Function, FUNC_NAME_RE
 
 
 def functiondef(c, m):
@@ -20,6 +20,6 @@ def functiondef(c, m):
 
 
 functiondef_statement = Statement(
-    r'function (\w+) \(([\w, ]+)\)(?: returns (\w+))? {',
+    r'function (%s) \(([\w, ]+)\)(?: returns (\w+))? {' % FUNC_NAME_RE,
     functiondef
 )
