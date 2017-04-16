@@ -48,7 +48,7 @@ class Compiler:
     def write(self, f):
         """Writes the current state to the given 'output' stream"""
         f.write('data segment\n')
-        for v in self.state.variables:
+        for v in self.state.variables.values():
             f.write('    ')
             f.write(v)
             f.write('\n')
@@ -82,11 +82,8 @@ class Compiler:
             if c[-1] != ':':
                 f.write('    ')
 
-            # Replace constants
-            for constant, value in self.state.constants:
-                c = constant.sub(value, c)
-
-            f.write(c)
+            # Replace constants and write
+            f.write(self.state.apply_constants(c))
             f.write('\n')
 
         f.write('\n')

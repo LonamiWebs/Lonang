@@ -14,8 +14,9 @@ class CompilerState:
         self.uid = 0
 
         # Declared variables, constants and function headers
-        self.variables = []
-        self.constants = []
+        # They are dictionaries so two cannot be declared with the same name
+        self.variables = {}
+        self.constants = {}
         self.functions = []
 
         # Parsed code
@@ -51,18 +52,18 @@ class CompilerState:
         # Append, don't extend, since we might pop many at once
         self.pending_code.append(values)
 
-    def add_variable(self, code):
+    def add_variable(self, name, code):
         """Appends the given code for declaring a variable"""
-        self.variables.append(code)
+        self.variables[name] = f'{name} {code}'
 
     def add_constant(self, name, replacement):
         """Adds a new constant with the given name and the specified value"""
         regex = re.compile(fr'\b{name}\b')
-        self.constants.append((regex, replacement))
+        self.constants[name] = (regex, replacement)
 
     def apply_constants(self, code):
         """Applies the available constants to the given line of code"""
-        for constant, value in self.constants:
+        for constant, value in self.constants.values():
             code = constant.sub(value, code)
 
         return code

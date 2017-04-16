@@ -11,10 +11,10 @@ def variable(c, m):
     # TODO Support for vectors (SomeString DB 23 DUP(?))
     # TODO Perform more checks to ensure the value is correct
     if m.group(1) == 'byte':
-        c.add_variable(f'{m.group(2)} DB {m.group(3)}')
+        c.add_variable(m.group(2), f'DB {m.group(3)}')
 
     elif m.group(1) == 'short':
-        c.add_variable(f'{m.group(2)} DW {m.group(3)}')
+        c.add_variable(m.group(2), f'DW {m.group(3)}')
 
     elif m.group(1) == 'string':
         # Analyze scape sequences and trim the quotes
@@ -42,7 +42,7 @@ def variable(c, m):
 
         result += ", '$'"
         # Now we have our resulting string encoded properly
-        c.add_variable(f'{m.group(2)} DB {result}')
+        c.add_variable(m.group(2), f'DB {result}')
 
     elif m.group(1) == 'const':
         c.add_constant(m.group(2), m.group(3))
