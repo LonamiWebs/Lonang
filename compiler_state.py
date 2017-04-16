@@ -76,7 +76,7 @@ class CompilerState:
         """
         for f in self.functions:
             if f.name == name and len(f.params) == param_count:
-                if must_return and f.returns is not None:
+                if not must_return or f.returns is not None:
                     return f
 
         return None
