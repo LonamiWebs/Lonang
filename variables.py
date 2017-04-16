@@ -30,7 +30,7 @@ class Variable:
         result = ''
 
         for a in analyzed:
-            if ord(a) <= 32:
+            if ord(a) < 32:
                 # Non-printable
                 if quote_open:
                     result += '", '
@@ -45,9 +45,9 @@ class Variable:
                 result += a
 
         if quote_open:
-            result += '"'
+            result += '", '
 
-        result += ", '$'"
+        result += "'$'"
         return result
 
     def to_code(self):
