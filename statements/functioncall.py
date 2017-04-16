@@ -19,7 +19,7 @@ def functioncall(c, m):
 
     if function is None:
         raise ValueError(
-            f'No function called {name} with {len(params)} argument(s) exists')
+            f'No function called {m.group(2)} with {len(params)} argument(s) exists')
 
     # We have a function, now copy the parameters if required
     #

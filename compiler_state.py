@@ -1,5 +1,5 @@
 import re
-from functions import FunctionEnd
+from functions import Function, FunctionEnd
 
 
 class CompilerState:
@@ -17,7 +17,7 @@ class CompilerState:
         # They are dictionaries so two cannot be declared with the same name
         self.variables = {}
         self.constants = {}
-        self.functions = []
+        self.functions = {}
 
         # Parsed code
         self.code = []
@@ -78,10 +78,9 @@ class CompilerState:
             If 'must_return' is True, then the function must also
             return some value to be valid
         """
-        for f in self.functions:
-            if f.name.strip('_') == name and len(f.params) == param_count:
-                if not must_return or f.returns is not None:
-                    return f
+        f = self.functions.get(Function.mangle(name, param_count))
+        if f and (not must_return or f.returns is not None):
+            return f
 
         return None
 
@@ -89,7 +88,7 @@ class CompilerState:
         """Begins a function definition. Subsequent 'add_code' calls
             will add the code to the function body and not the main code
         """
-        self.functions.append(function)
+        self.functions[function.name] = function
         self.defining_function = function
 
         # Used when popping pending code to determine when it ends

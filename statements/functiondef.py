@@ -8,7 +8,11 @@ def functiondef(c, m):
             ; code
         }
     """
-    f = Function(m)
+    f = Function(
+        name=m.group(1),
+        params=m.group(2),
+        returns=m.group(3)
+    )
     # Ensure that the function doesn't have repeated parameters
     for i in range(len(f.params)):
         for j in range(i + 1, len(f.params)):

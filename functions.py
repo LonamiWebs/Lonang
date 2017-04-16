@@ -2,21 +2,26 @@ import re
 
 
 class Function:
-    def __init__(self, m):
-        # Name of the function
-        self.name = m.group(1)
-
-        # Parameter names used
-        self.params = self.get_params(m.group(2))
+    def __init__(self, name, params, returns=None, mangle=True):
+        # Convert a comma separated list to normal parameters if required
+        self.params = params if isinstance(params, list)\
+                             else self.get_params(params)
 
         # Name mangling, add as many underscores as parameter count
-        self.name += '_' * len(self.params)
+        if mangle:
+            self.name = self.mangle(name, len(self.params))
+        else:
+            self.name = name
 
         # Where the value is returned
-        self.returns = m.group(3)
+        self.returns = returns
 
         # Used to store the code of the function
         self.code = []
+
+    @staticmethod
+    def mangle(name, param_count):
+        return name + '_' * param_count
 
     @staticmethod
     def get_params(string):

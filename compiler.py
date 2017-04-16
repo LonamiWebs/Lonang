@@ -62,7 +62,7 @@ class Compiler:
 
         f.write('code segment\n')
         # Define the functions
-        for function in self.state.functions:
+        for function in self.state.functions.values():
             f.write(f'  {function.name} PROC\n')
             for c in function.code:
                 if c[-1] != ':':
