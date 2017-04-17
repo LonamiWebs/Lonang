@@ -21,12 +21,15 @@ class Variable:
         else:
             if vartype == 'byte':
                 self.typecode = 'DB'
+                self.size = 8
 
             elif vartype == 'short':
                 self.typecode = 'DW'
+                self.size = 16
 
             elif vartype == 'string':
                 self.typecode = 'DB'
+                self.size = 8
                 self.value = self.escape_string(value)
 
             else:

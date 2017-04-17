@@ -73,10 +73,7 @@ ax, dx = divmod(ax, bx)
 printf("%s, hello %s! How come you've came to %s\r\n", place, person, place)
 
 setcursor(12, little)
-;printf("ax=%d, bx=%d, cx=%d, dx=%d", ax, bx, cx, dx)
-
-setcursor(12, 37)
-printf("Middle")
+printf("ax=%d, bx=%d, cx=%d, dx=%d", ax, bx, cx, dx)
 '''
 
 
