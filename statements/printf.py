@@ -1,7 +1,7 @@
 from .statement import Statement
 from variables import Variable
 from utils import helperassign, get_csv, is_register
-from builtin_functions import define_integer_to_string
+from builtin_functions import define_integer_to_string, define_tmp_variable
 import re
 
 
@@ -27,6 +27,11 @@ def load_integer(c, var_name):
     # AX was lost, we need to set the right value again TODO Improve ITOS!!
     c.add_code(f'mov ah, 9')
     c.add_code(f'lea dx, {itos.returns}')
+
+
+def is_ax_or_dx_variant(register):
+    """Returns True if the register is 'ax', 'dx' or a variant"""
+    return register[0] in 'ad' and register[1] in 'xhl'
 
 
 def printf(c, m):
@@ -84,12 +89,14 @@ def printf(c, m):
     else:
         # Captured a string, with possibly formatted arguments
         #
-        # Since 'ax' and 'dx' are needed for printing, we might
-        # need to push them more times to pop them as required.
-        # Also in reversed order, since the stack pops in reverse
-        for a in reversed(args):
-            if a in ['ax', 'dx']:
-                c.add_code(f'push {a}')
+        # Since 'ax' and 'dx' are needed for printing, we need to save them.
+        # We could use the stack, however, we would need to push as many times
+        # as we encountered one of the offending registers. Also, the stack
+        # doesn't support the 8-bit versions of these registers, so we simply
+        # use a temporary variable.
+        for a in args:
+            if is_ax_or_dx_variant(a):
+                helperassign(c, define_tmp_variable(c, a), a)
 
         # After we saved the values we may later need, set up the print function
         c.add_code('mov ah, 9')
@@ -114,10 +121,9 @@ def printf(c, m):
                     if arg_type == '%s':
                         c.add_code(f'lea dx, {var_name}')
                     elif arg_type == '%d':
-                        if var_name in ['ax', 'dx']:
-                            # Special, this was pushed previously
-                            c.add_code('pop ax')
-                            load_integer(c, 'ax')
+                        if is_ax_or_dx_variant(var_name):
+                            # Special, this was saved previously
+                            load_integer(c, define_tmp_variable(c, var_name))
                             c.add_code('mov ah, 9')
                         else:
                             load_integer(c, var_name)

@@ -90,3 +90,18 @@ def define_set_cursor(c):
     c.close_block()
 
     return function
+
+
+def define_tmp_variable(c, register):
+    """Defines a temporary variable for the given
+        register, to be used instead of the stack.
+
+        Returns the name of the temporary variable.
+    """
+    vname = f'_v_tmp_{register}'
+    if vname not in c.variables:
+        # TODO Use utils to determine the size instead?
+        size = 'byte' if register[-1] in 'hl' else 'short'
+        c.add_variable(Variable(vname, size, '?'))
+
+    return vname
