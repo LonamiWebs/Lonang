@@ -12,6 +12,9 @@ class Variable:
             except ValueError:
                 raise ValueError(f'Unknown length value "{self.length[:-1]}"')
 
+        self.type = vartype
+
+        # Type defined, now determine its code
         self.is_constant = vartype == 'const'
         if self.is_constant:
             self.typecode = None

@@ -126,8 +126,7 @@ def get_csv(values):
     if isinstance(values, list):
         return values
 
-    values = values.strip()
-    if values:
+    if values and values.strip():
         return [v.strip() for v in values.split(',')]
     else:
         return []

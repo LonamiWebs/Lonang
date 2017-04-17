@@ -1,6 +1,6 @@
 from .statement import Statement
 from variables import Variable
-from utils import helperassign
+from utils import helperassign, get_csv, is_register
 from builtin_functions import define_integer_to_string
 import re
 
@@ -46,89 +46,101 @@ def printf(c, m):
     #        +  2 instructions; push/pop dx
     #        + 2n (where n is the number of strings, lea + int)
     #
-    # Determine the string (or variable) to print and its arguments
-    string = m.group(1).strip()
-    args_at = string.rfind('%')
-    if args_at == -1:
-        args = None
-    else:
-        args = [a.strip() for a in string[args_at+1:].split(',')]
-        string = string[:args_at].strip()
+    # Retrieve the captured values
+    string = m.group(1)
+    args = get_csv(m.group(2))
+    var = m.group(3)
 
-    # Once, so we can restore it at the very end
+    # Save the registers used for calling the print interruption
     c.add_code('push ax',
                'push dx')
 
-    # Since 'ax' and 'dx' are needed for printing, we might
-    # need to push them more times to pop them as required.
-    # Also in reversed order, since the stack pops on reverse
-    for a in reversed(args):
-        if a in ['ax', 'dx']:
-            c.add_code(f'push {a}')
-
-    # After we saved the values we may later need, set up the print function
-    c.add_code('mov ah, 9')
-
-    # Now, we have the right string and the arguments used
-    if args:
-        # 1. Find %X's
-        substrings = re.split(r'%[sd]', string)
-        arg_types = re.findall(r'%[sd]', string)
-
-        # 2. Print: substring, formatted, substring, formatted, etc.
-        for i in range(len(substrings)):
-            if i > 0:
-                # Format the arguments, skipping 1 normal string (thus -1)
-                var_name = args[i-1]
-                arg_type = arg_types[i-1]
-
-                # Load the argument into 'dx' depending on its type
-                #
-                # This assumes that the user entered the right type
-                # TODO Don't assume that the user entered the right type
-                if arg_type == '%s':
-                    c.add_code(f'lea dx, {var_name}')
-                elif arg_type == '%d':
-                    if var_name in ['ax', 'dx']:
-                        # Special, this was pushed previously
-                        c.add_code('pop ax')
-                        load_integer(c, 'ax')
-                        c.add_code('mov ah, 9')
-                    else:
-                        load_integer(c, var_name)
-                else:
-                    raise ValueError(f'Regex should not have allowed {arg_type}')
-
-                # Call the interruption to print the argument
-                c.add_code(f'int 21h')
-
-            # Argument formatted, print the next part of the string
-            define_and_print(c, substrings[i])
-
-    # No arguments, only a variable or a raw string
-    else:
-        if string in c.variables:
+    # string/args and var are mutually exclusive
+    if var:
+        # Captured a single variable, which means no formatting
+        if var in c.variables:
             # Using a variable, load and call the interruption
-            variable = c.variables[string]
+            variable = c.variables[var]
 
             if variable.type == 'string':
                 c.add_code(f'lea dx, {variable.name}')
             else:
-                load_integer(c, var.name)
+                load_integer(c, variable.name)
 
+            c.add_code(f'mov ah, 9')
             c.add_code(f'int 21h')
-        else:
-            # Assume inmediate value, convert it to string if required
-            # TODO This won't check a string variable starts and ends with "!
-            if string[0] != '"':
-                string = f'"{string}"'
 
+        elif is_register(var):
+            # Using a register, which means we need to load an integer
+            load_integer(c, var)
+            c.add_code(f'mov ah, 9')
+            c.add_code(f'int 21h')
+
+        else:
+            # Assume inmediate integer value
+            c.add_code(f'mov ah, 9')
+            define_and_print(c, f'"{var}"')
+
+    else:
+        # Captured a string, with possibly formatted arguments
+        #
+        # Since 'ax' and 'dx' are needed for printing, we might
+        # need to push them more times to pop them as required.
+        # Also in reversed order, since the stack pops in reverse
+        for a in reversed(args):
+            if a in ['ax', 'dx']:
+                c.add_code(f'push {a}')
+
+        # After we saved the values we may later need, set up the print function
+        c.add_code('mov ah, 9')
+
+        # Now, we have the right string and the arguments used
+        if args:
+            # 1. Find %X's
+            substrings = re.split(r'%[sd]', string)
+            arg_types = re.findall(r'%[sd]', string)
+
+            # 2. Print: substring, formatted, substring, formatted, etc.
+            for i in range(len(substrings)):
+                if i > 0:
+                    # Format the arguments, skipping 1 normal string (thus -1)
+                    var_name = args[i-1]
+                    arg_type = arg_types[i-1]
+
+                    # Load the argument into 'dx' depending on its type
+                    #
+                    # This assumes that the user entered the right type
+                    # TODO Don't assume that the user entered the right type
+                    if arg_type == '%s':
+                        c.add_code(f'lea dx, {var_name}')
+                    elif arg_type == '%d':
+                        if var_name in ['ax', 'dx']:
+                            # Special, this was pushed previously
+                            c.add_code('pop ax')
+                            load_integer(c, 'ax')
+                            c.add_code('mov ah, 9')
+                        else:
+                            load_integer(c, var_name)
+                    else:
+                        raise ValueError(f'Regex should not have allowed {arg_type}')
+
+                    # Call the interruption to print the argument
+                    c.add_code(f'int 21h')
+
+                # Argument formatted, print the next part of the string
+                define_and_print(c, substrings[i])
+        else:
+            # No arguments at all, a define and load will do
             define_and_print(c, string)
 
+    # All done, restore the original dx/ax values
     c.add_code('pop dx',
                'pop ax')
 
 printf_statement = Statement(
-    r'printf  (.+)',
+    #          A string possibly formatted
+    r'printf \( ("[\s\S]+") (?:, (CSV))? \)|printf \( (\w+) \)',
+    #                                         Or a single var
+
     printf
 )
