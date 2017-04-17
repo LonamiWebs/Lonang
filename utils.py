@@ -19,11 +19,11 @@ ctoi = {
 }
 
 
-def helperassign(dst, src):
+def helperassign(c, dst, src):
     """Helper assign with support for assigning 8 bits to 16"""
     # TODO Add support for actually assigning CL/CH to CX (i.e. XOR the rest)
     if dst == src:
-        return None
+        return
 
     dst = get_csv(dst)
     src = get_csv(src)
@@ -32,7 +32,8 @@ def helperassign(dst, src):
 
     # Quick, most straightforward case
     if len(dst) == 1:
-        return f'mov {dst[0]}, {src[0]}'
+        c.add_code(f'mov {dst[0]}, {src[0]}')
+        return
 
     # Multiple assignment
     # We have a function, now copy the parameters if required
@@ -51,8 +52,6 @@ def helperassign(dst, src):
     #   ax, bx, cx = bx, ax, ax
     #
     # But before doing any of this, let's make sure there's no 'ax = ax'
-    RESULT = ''
-
     for i in reversed(range(len(dst))):
         if dst[i] == src[i]:
             dst.pop(i)
@@ -85,18 +84,17 @@ def helperassign(dst, src):
             if dstv == src[j]:
                 found = True
                 pushed.append(src[j])
-                RESULT += f'push {src[j]}\n'
+                c.add_code(f'push {src[j]}')
 
         # If the parameter we've pushed matches the one being used,
         # use the pushed one since it contains the right value
         if pushed and pushed[-1] == srcv:
             # Pop to assign the value to the function parameter
-            RESULT += f'pop {dstv}\n'
+            c.add_code(f'pop {dstv}')
             pushed.pop()
         else:
-            RESULT += f'mov {dstv}, {srcv}\n'
+            c.add_code(f'mov {dstv}, {srcv}')
 
-    return RESULT
     # TODO These 'pop's won't be able to push 8 bits, thus neither pop them,
     #      whereas the basic helperassign() would, in theory, support this
 

@@ -22,7 +22,7 @@ def load_integer(c, var_name):
         and loads it to dx, so it's ready to be printed
     """
     itos = define_integer_to_string(c)
-    c.add_code(helperassign(itos.params[0], var_name))
+    helperassign(c, itos.params[0], var_name)
     c.add_code(f'call {itos.name}')
     # AX was lost, we need to set the right value again TODO Improve ITOS!!
     c.add_code(f'mov ah, 9')

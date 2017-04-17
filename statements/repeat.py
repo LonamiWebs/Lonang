@@ -13,8 +13,7 @@ def repeat(c, m):
     labelend = label + '_e'
 
     # Initialize our loop counter
-    if m.group(1) != m.group(2):
-        c.add_code(helperassign(m.group(2), m.group(1)))
+    helperassign(c, m.group(2), m.group(1))
 
     # Sanity check, if 0 don't enter the loop unless we know it's not 0
     # This won't optimize away the case where the value is 0

@@ -62,7 +62,7 @@ repeat 2 with cx { @primerLoop
 dx = myMethod(7, 3)
 
 ax = gcd(35, 15)
-printf "gcd(35, 17) = %d\r\n" % ax
+printf "gcd(35, 15) = %d\r\n" % ax
 
 ax = gcd(211, 173)
 

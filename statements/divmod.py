@@ -16,8 +16,8 @@ def divmod_(c, m):
         # Both are integers, we can optimize this away
         # and just plug the right values in
         a, b = divmod(a, b)
-        c.add_code(helperassign(m.group(1), a))
-        c.add_code(helperassign(m.group(2), b))
+        helperassign(c, m.group(1), a)
+        helperassign(c, m.group(2), b)
     else:
         # Need to perform the operation
         quotient = m.group(1)
@@ -54,14 +54,14 @@ def divmod_(c, m):
                 c.add_code('push bx')
 
             # Update whatever register we used
-            c.add_code(helperassign(used_divisor, divisor))
+            helperassign(c, used_divisor, divisor)
         else:
             # We have the right value for the divisor, no move required
             used_divisor = divisor
 
         # Divisor set up, neither in 'ax' nor 'dx' so it's OK
         # Now set up the dividend, which must always be in 'ax'
-        c.add_code(helperassign('ax', dividend))
+        helperassign(c, 'ax', dividend)
 
         # Everything set, perform the division
         c.add_code(f'xor dx, dx')  # Upper bits are considered!
@@ -78,14 +78,17 @@ def divmod_(c, m):
                        'mov ax, dx',
                        'pop dx')
         else:
+            # Although helperassign would take care of these, we can
+            # slightly optimize away the otherwise involved push/pop
+            #
+            # TODO Actually, perhaps helper assign could note this and
+            # swap the order of assignment
             if quotient == 'dx':
                 # Special case, we need to move remainder, in 'dx', first
-                c.add_code(helperassign(remainder, 'dx'))
-                c.add_code(helperassign(quotient, 'ax'))
+                helperassign(c, [remainder, quotient], ['dx', 'ax'])
             else:
                 # Normal case, first 'ax', then 'dx'
-                c.add_code(helperassign(quotient, 'ax'))
-                c.add_code(helperassign(remainder, 'dx'))
+                helperassign(c, [quotient, remainder], ['ax', 'dx'])
 
         if push_dx:
             c.add_code('pop dx')
