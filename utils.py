@@ -95,14 +95,21 @@ def helperassign(c, dst, src):
             c.add_code(f'mov {dst}, {src}')
 
         elif dst_size < src_size:
-            # The destination is smaller, we need to omit the high part
+            # The destination is smaller, we have to ignore the high part
             if src_memo:
                 # The source is memory, then the destination is a register
-                # Only registers with access to 'H' and 'L' are 8 bits in
-                # size, so we can move first to the 'X' version
                 #
-                # NOTE that no masking is done not to lose information!
-                c.add_code(f'mov {dst[0]}x, {src}')
+                # We need an auxiliary register because we don't want to
+                # touch the other part (either of r'[HL]'), and we can't
+                # pop a masked value not to lose the rest
+                #
+                # Use either 'dx' or 'ax' as auxiliar register (arbitrary
+                # as long as it doesn't match the one we want to move to)
+                aux = 'dx' if dst[0] == 'a' else 'ax'
+                c.add_code(f'push {aux}')
+                c.add_code(f'mov {aux}, {src}')
+                c.add_code(f'mov {dst}, {aux[0]}l')
+                c.add_code(f'pop {aux}')
             else:
                 # The source is not memory, we might not need moving it
                 # if we can directly access to the low part of the register
