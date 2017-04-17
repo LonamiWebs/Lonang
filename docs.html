@@ -11,7 +11,7 @@
         width: 800px;
         margin: 40px auto;
         padding: 20px;
-        margin-radius: 2px;
+        border-radius: 2px;
     }
     pre {
         background: #222;
@@ -19,27 +19,44 @@
         font-family: monospace;
         padding: 8px 24px;
     }
+    code {
+        padding: 1px 4px;
+        margin: 1px 0;
+        font-size: 90%;
+        color: #b32;
+        background-color: #fee;
+        border-radius: 2px;
+    }
     #goup {
         position: fixed;
-        background: #bff;
-        padding: 16px;
         right: 40px;
         bottom: 40px;
         text-align: center;
-        border-radius: 4px;
+        opacity: 0.4;
+        transition: opacity 400ms;
+    }
+    #goup:hover {
+        opacity: 1;
+    }
+    .arrow-up {
+        width: 0; 
+        height: 0; 
+        border-left: 18px solid transparent;
+        border-right: 18px solid transparent;
+        border-bottom: 24px solid #448;
     }
     </style>
 </head>
 <body>
-<span id="goup">
-    <a href="#index">Back to<br />the index</a>
-</span>
+<a id="goup" href="#index">
+    <div class="arrow-up" title="Go up"></div>
+</a>
 <div id="main">
     <h1>Lonang 8086 Compiler</h1>
     <p>This document describes the basic usage of the <b>Lonang 8086</b>.
     This language is a C++ like language which is used to generate
     <i>8086 assembly</i> executable code.</p>
-    
+
     <h2 id="index">Index</h2>
     <ul>
         <li><a href="#general">General</a></li>
@@ -48,54 +65,92 @@
         <li>
             <a href="#control-flow">Control flow</a>
             <ul>
-                <li><a href="#if-else-statements">If-else statements</a></li>
-                <li><a href="#repeat-loop">Repeat loop</a></li>
-                <li><a href="#while-loop">While loop</a></li>
+                <li><a href="#if-else-statements"><code>if-else</code> statements</a></li>
+                <li><a href="#repeat-loop"><code>repeat</code> loop</a></li>
+                <li><a href="#while-loop"><code>while</code> loop</a></li>
             </ul>
         </li>
         <li><a href="#functions">Functions</a></li>
         <li>
             <a href="#builtin-functions">Built-in functions</a>
             <ul>
-                <li><a href="#divmod">Divmod function</a></li>
+                <li><a href="#divmod"><code>divmod</code> function</a></li>
             </ul>
         </li>
         <li><a href="#basic-io">Basic IO</a></li>
             <ul>
-                <li><a href="#printf">Printf statement</a></li>
+                <li><a href="#printf"><code>printf</code> statement</a></li>
             </ul>
         </li>
     </ul>
-    
+
     <h2 id="general">General</h2>
     <p>Only <b>one</b> statement per line is allowed, since the statement
     separator used is the new line character.</p>
-    
+
     <h2 id="variables">Variables</h2>
     <p>Variables can be defined anywhere in the code, although it is
     recommended to define them at the <i>top</i> of the file. Currently
     the types supported are:</p>
     <ul>
-        <li><b>byte</b>: Defines a 8-bit integer value.</li>
-        <li><b>short</b>: Defines a 16-bit integer value.</li>
-        <li><b>string</b>: Defines a string variable (sequence of bytes).</li>
-        <li><b>const</b>: Defines a constant value, replaced on compile time.</li>
+        <li><code>byte</code>: Defines a 8-bit integer value.</li>
+        <li><code>short</code>: Defines a 16-bit integer value.</li>
+        <li><code>string</code>: Defines a string variable (sequence of bytes).</li>
+        <li><code>const</code>: Defines a constant value, replaced on compile time.</li>
     </ul>
-    <p>The <b>string</b> type <b>must</b> be ASCII values, and escape sequences
-    are supported, such as <i>\r\n</i> for new line, <i>\t</i> for TAB, etc.</p>
-    
+    <p>The <code>string</code> type <b>must</b> be ASCII values, and escape
+    sequences are supported, such as <i>\r\n</i> for new line, <i>\t</i> for
+    TAB, etc.</p>
+
     <p>Some examples are shown below:</p>
 <pre>
+; Declaration
 byte mybyte = 0x7F
 short myint = 0x7FFF
 string str = "Some string...\r\n"
 
 const VALUE = 0x7FFF
+
+; Assignment
+ax, mybyte = 42, 13
+
+; Swapping values
+ax, bx = bx, ax
 </pre>
-    
+
+    <p>All variables all <b>global</b>, which means that when a function
+    modifies a variable, the changes are reflected upon the whole file.
+    One should be careful with this.</p>
+
+    <p>There exist certain "special" variables which directly correspond
+    with the <b>registers</b> of the underlying machine. These are also global.
+    One should always use registers when possible, since they're faster to
+    access than any other variable. The available registers are,
+    for <code>short</code> integers:</p>
+    <pre>ax, cx, dx, bx, si, di</pre>
+
+    <p>The <i>first</i> three are recommended for general use, and the
+    <i>last</i> three are recommended when indexing a vector, since this
+    allows certain optimizations.</p>
+
+    <p>One can access to the <code>byte</code> version of these by specifying:</p>
+    <pre>ah, al, bh, bl, ch, cl, dh, dl</pre>
+
+    <p>Note, however, that <b>these point to the same registers</b> as the
+    first letter indicates. However, one can select to use the <b>h</b>igh
+    or the <b>l</b>ow part of the register, but modifying either will result
+    in the modification of the <b>x</b> version.</p>
+
+    <p>Available short registers, although <b>not recommended</b> to use:</p>
+    <pre>cs, ds es, ss, sp, bp</pre>
+
+    <p>The first four point to the application segments, such as data and
+    code, and the last two point to the stack. Modifying any of these will
+    result in unpredictable results.</p>
+
     <h2 id="comments">Comments</h2>
     <p>Inline comments can be specified after the statement, separated by
-    the semicolon character '<i>;</i>'. Multiline comments can also be made,
+    the semicolon character <code>;</code>. Multiline comments can also be made,
     these being composed of a starting and an ending semicolon alone:</p>
 <pre>
 ;
@@ -107,29 +162,29 @@ const VALUE = 0x7FFF
 
 byte value = 42 ; Inlined comment
 </pre>
-    
+
     <h2 id="control-flow">Control flow</h2>
-    <h3 id="if-else-statements">If-else statements</h3>
+    <h3 id="if-else-statements"><code>if-else</code> statements</h3>
     <p>Conditional blocks allow to execute a piece of code if a criteria is met.
     It is also possible to execute a different piece of code if that initial
     condition is not met, although this is optional. The braces <b>must</b>
     be on the same line as the statements</p>
-    
+
     <p>It is possible to optionally label <i>if</i> and <i>else</i> statements
-    by appending <b>@labelName</b> to the end, before any comments. This will
-    result in different label names on the generated assembly code. When
+    by appending <code>@labelName</code> to the end, before any comments. This
+    will result in different label names on the generated assembly code. When
     omitted, a unique ID will be used.</p>
-    
+
     <p>The supported operators for use on conditional expressions are:</p>
     <ul>
-        <li><b>==</b>. Met when both sides are equal.</li>
-        <li><b>!=</b>. Met when both sides are different.</li>
-        <li><b>&lt;</b>. Met when the left side is less than the right side.</li>
-        <li><b>&gt;</b>. Met when the left side is greater than the right side.</li>
-        <li><b>&lt;=</b>. Met when the left side is less or equal to the right side.</li>
-        <li><b>&gt;=</b>. Met when the left side is greater or equal to the right side.</li>
+        <li><code>==</code>. Met when both sides are equal.</li>
+        <li><code>!=</code>. Met when both sides are different.</li>
+        <li><code>&lt;</code>. Met when the left side is less than the right side.</li>
+        <li><code>&gt;</code>. Met when the left side is greater than the right side.</li>
+        <li><code>&lt;=</code>. Met when the left side is less or equal to the right side.</li>
+        <li><code>&gt;=</code>. Met when the left side is greater or equal to the right side.</li>
     </ul>
-    
+
     <p>As an example:</p>
 <pre>
 if ax &lt; bx { @myFirstIf
@@ -142,11 +197,11 @@ if ax &lt; bx { @myFirstIf
     ;
 }
 </pre>
-    
-    <h3 id="repeat-loop">Repeat loop</h3>
-    <p>The <b>repeat</b> loop can be used to repeat a specific part of the code
-    a <i>n</i> amount of times. Its syntax is defined as follows:</p>
-    
+
+    <h3 id="repeat-loop"><code>repeat</code> loop</h3>
+    <p>The <code>repeat</code> loop can be used to repeat a specific part of
+    the code a <i>n</i> amount of times. Its syntax is defined as follows:</p>
+
 <pre>
 repeat <i>n</i> with <i>var</i> {
     ;
@@ -154,18 +209,18 @@ repeat <i>n</i> with <i>var</i> {
     ;
 }
 </pre>
-    
-    <p>This statement can also be labeled. The reason why the <i>with</i> part
-    is explicit is because it implies that <i>var</i> will be used to count
-    down <i>n</i> times until <i>0</i> is reached.</p>
-    
+
+    <p>This statement can also be labeled. The reason why the <code>with</code>
+    part is explicit is because it implies that <code>var</code> will be used
+    to count down <i>n</i> times until <i>0</i> is reached.</p>
+
     <p>The possible values for <b>n</b> are either a decimal number (can also
     be expressed in either hexadecimal or binary, with the <i>h</i> or <i>b</i>
     suffix, defaults to decimal), a register or a variable.</p>
-    
-    <p>The possible values for <b>var</b> are either a register or a variable.
-    Certain optimizations will be made if the register used is <b>cx</b>:</p>
-    
+
+    <p>The possible values for <code>var</code> are either a register or a
+    variable. Certain optimizations will be made if the register used is <b>cx</b>:</p>
+
 <pre>
 ; Multiplication with repeated sums
 ax = 0
@@ -173,11 +228,11 @@ repeat 3 with cx { @myLoop
     ax += 2
 }
 </pre>
-    
-    <h3 id="while-loop">While loop</h3>
-    <p>The <b>while</b> loop can be used to repeat a specific part an indefined
-    amount of times, depending on an arbitrary condition. Once this condition
-    is not met, the loop will end:</p>
+
+    <h3 id="while-loop"><code>while</code> loop</h3>
+    <p>The <code>while</code> loop can be used to repeat a specific part an
+    indefined amount of times, depending on an arbitrary condition. Once
+    this condition is not met, the loop will end:</p>
 <pre>
 while ax &lt; 10 {
     ;
@@ -189,7 +244,7 @@ while ax &lt; 10 {
     <p>The code will <b>not</b> be executed even once if the condition is
     not met in the first place (<i>e.g.</i> ax turns out to be &gt;= 10).
     To solve this, it is possible to specify the loop to execute <b>at least
-    once</b> with the <i>or once</i> modifier:</p>
+    once</b> with the <code>or once</code> modifier:</p>
 <pre>
 ax = 9
 while ax == 10 <b>or once</b> {
@@ -197,22 +252,22 @@ while ax == 10 <b>or once</b> {
 }
 </pre>
 
-    <p>The first time the loop will enter thanks to the <i>or once</i> part.
-    In the loop, <i>ax</i> will become 10. Then the loop will repeat because
-    the condition is met, and exit once <i>ax</i> becomes 11.</p>
+    <p>The first time the loop will enter thanks to the <code>or once</code>
+    part. In the loop, <i>ax</i> will become 10. Then the loop will repeat
+    because the condition is met, and exit once <i>ax</i> becomes 11.</p>
 
     <h2 id="functions">Functions</h2>
     <p>Functions <b>must</b> be declared at the top of the file, since
     their signature has to be known beforehand to determine whether a call
     to them is legal or not.</p>
-    
-    <p>Functions are defined by the <b>function</b> keyword, followed by
+
+    <p>Functions are defined by the <code>function</code> keyword, followed by
     the function name to be used. After this, a list of comma separated
     registers or variables must be specified insides parenthesis. Optionally,
-    one can use the <b>returns</b> keyword to determine where the returned
-    value will be passed. If omitted, the function will be considered to
-    return nothing. These can also be labeled.</p>
-    
+    one can use the <code>returns</code> keyword to determine where the
+    returned value will be passed. If omitted, the function will be considered
+    to return nothing. These can also be labeled.</p>
+
 <pre>
 function multiply(ax, bx) returns dx {
     dx = 0
@@ -234,7 +289,7 @@ function multiply(ax, bx) returns dx {
 <pre>
 dx = multiply(7, 5)
 </pre>
-    
+
     <p>Optimization will be made if the arguments passed match the
     original parameters list, and so will the resulting assignment.
     In the example above, no copying will be made from <i>dx</i> to <i>dx</i>
@@ -244,7 +299,7 @@ ax = 7
 bx = 5
 dx = multiply(bx, ax)
 </pre>
-    
+
     <p>The value of <i>ax</i> would have to first get saved, then updated
     with the right value, and then restoring the saved value into <i>bx</i>,
     this is, <b>three</b> operations in contrast to no copying at all
@@ -256,10 +311,11 @@ dx = multiply(bx, ax)
     are, although they do <b>not</b> use parenthesis to separate the argument
     list. Every of these are treated as a different statement.</p>
 
-    <h3 id="divmod">Divmod function</h3>
-    <p>The <b>divmod</b> function can be used to perform both <i>division</i>
-    and the <i>modulo</i> operator (to obtain the remainder). It will calculate
-    both values on dividing the first argument by the second one:</p>
+    <h3 id="divmod"><code>divmod</code> function</h3>
+    <p>The <code>divmod</code> function can be used to perform both
+    <i>division</i> and the <i>modulo</i> operator (to obtain the remainder).
+    It will calculate both values on dividing the first argument by the second
+    one:</p>
 <pre>
 ; Store (ax divided by bx) in ax
 ; Store (ax modulo bx) in dx
@@ -282,17 +338,17 @@ ax, dx = divmod ax, bx
     <p>It's possible to perform basic input/output operations using the console
     as an interface with the user.</p>
 
-    <h3 id="printf">Printf statement</h3>
+    <h3 id="printf"><code>printf</code> statement</h3>
     <p>This statement allows to <b>print</b> a possibly <b>f</b>ormatted string
     to the console. No formatting can be made when printing an already-defined
     string variable, since special handling is performed to generate a
     string which allows being formatted.</p>
 
-    <p>After the <i>printf</i> keyword, a variable or a string can be specified.
-    If an inmediate string is specified, it can contain <b>%X</b> where <b>X</b>
-    indicates the type of the variable to be formatted (either a <b>s</b>tring
-    or a <b>d</b>ecimal value), which are later specified in a comma-separated
-    fashion after the <b>%</b> character:</p>
+    <p>After the <code>printf</code> keyword, a variable or a string can be
+    specified. If an inmediate string is specified, it can contain <b>%X</b>
+    where <b>X</b> indicates the type of the variable to be formatted (either a
+    <b>s</b>tring or a <b>d</b>ecimal value), which are later specified in a
+    comma-separated fashion after the <b>%</b> character:</p>
 <pre>string hello = "Hello, world!\r\n"
 string person = "User"
 short favourite = 42
