@@ -97,6 +97,6 @@ def divmod_(c, m):
       
 
 divmod_statement = Statement(
-    r'(\w+) , (\w+) = divmod  (VALUE) , (VALUE)',
+    r'(\w+) , (\w+) = divmod \( (VALUE) , (VALUE) \)',
     divmod_
 )

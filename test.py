@@ -27,7 +27,7 @@ function myMethod(ax, bx) returns number {
 
 function gcd(ax, bx) returns ax {
     if bx != 0 {
-        ax, dx = divmod ax, bx
+        ax, dx = divmod(ax, bx)
         ax = gcd(bx, dx)
     }
 }
@@ -68,7 +68,7 @@ ax = gcd(211, 173)
 
 ax = 10
 bx = 3
-ax, dx = divmod ax, bx
+ax, dx = divmod(ax, bx)
 
 printf("%s, hello %s! How come you've came to %s\r\n", place, person, place)
 printf("ax=%d, bx=%d, cx=%d, dx=%d", ax, bx, cx, dx)
