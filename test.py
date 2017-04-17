@@ -66,7 +66,8 @@ ax = 10
 bx = 3
 ax, dx = divmod ax, bx
 
-printf "%s, hello %s! How come you've came to %s" % place, person, place
+printf "%s, hello %s! How come you've came to %s\r\n" % place, person, place
+printf "ax=%d, bx=%d, cx=%d, dx=%d" % ax, bx, cx, dx
 '''
 
 
