@@ -80,6 +80,7 @@
         <li><a href="#basic-io">Basic IO</a></li>
             <ul>
                 <li><a href="#printf"><code>printf</code> function</a></li>
+                <li><a href="#setcursor"><code>setcursor</code> function</a></li>
             </ul>
         </li>
     </ul>
@@ -360,6 +361,17 @@ printf("\r\nExiting...\r\n")</pre>
     <p>If two subsequent calls were to be made to <code>printf</code>,
     it's recommended to use <code>printf("%s%s", str1, str2)</code> since
     furhter optimization will be made.</p>
+
+    <h3 id="setcursor"><code>setcursor</code> function</h3>
+    <p>This function allows to freely <b>set the cursor</b> on the screen.
+    The list of parameters to be supplied are, in this order, the <i>row</i>
+    and then the <i>column</i> to which the cursor should move:</p>
+<pre>setcursor(12, 37)
+printf("Middle")</pre>
+
+    <p>Since the screen defaults to 80 columns and 25 rows, in this case,
+    <code>12, 37</code> would be able to print <code>"Middle"</code> on
+    the middle of the screen.</p>
 </div>
 </body>
 </html>

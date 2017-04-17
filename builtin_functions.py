@@ -64,7 +64,29 @@ _f_itos_loop2:
     pop bx''')
     c.close_block()
 
-    # Now it is defined, flag not to re-define it
-    def_integer_to_string = True
+    return function
+
+def define_set_cursor(c):
+    """Defines the 'setcursor' built-in function.
+        DH contains the row and DL contains the column.
+
+        Returns the Function header.
+    """
+    fname = '_f_setc'
+    function = Function(fname, params=['dx'])
+
+    # Early exit if it's already defined
+    if fname in c.functions:
+        return function
+
+    c.begin_function(function)
+    c.add_code('''push ax
+    push bx
+    mov ah, 2
+    mov bh, 0
+    int 10h
+    pop bx
+    pop ax''')
+    c.close_block()
 
     return function
