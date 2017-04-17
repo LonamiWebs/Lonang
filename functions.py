@@ -1,11 +1,11 @@
 import re
+from utils import get_csv
 
 
 class Function:
     def __init__(self, name, params, returns=None, mangle=True):
         # Convert a comma separated list to normal parameters if required
-        self.params = params if isinstance(params, list)\
-                             else self.get_params(params)
+        self.params = get_csv(params)
 
         # Name mangling, add as many underscores as parameter count
         if mangle:
@@ -22,15 +22,6 @@ class Function:
     @staticmethod
     def mangle(name, param_count):
         return name + '_' * param_count
-
-    @staticmethod
-    def get_params(string):
-        """Converts a comma separated items string into a list of items"""
-        string = string.strip()
-        if string:
-            return [p.strip() for p in string.split(',')]
-        else:
-            return []
 
     def add_code(self, *values):
         """Extends or appends the string value(s) for the code"""

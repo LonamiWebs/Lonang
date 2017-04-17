@@ -1,5 +1,5 @@
 from .statement import Statement
-from .utils import helperassign, parseint
+from utils import helperassign, parseint
 
 
 def repeat(c, m):

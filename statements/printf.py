@@ -1,6 +1,6 @@
 from .statement import Statement
 from variables import Variable
-from .utils import helperassign
+from utils import helperassign
 from builtin_functions import define_integer_to_string
 import re
 

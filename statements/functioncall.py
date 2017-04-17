@@ -1,5 +1,5 @@
 from .statement import Statement
-from .utils import helperassign
+from utils import helperassign, get_csv
 from functions import Function
 
 
@@ -8,7 +8,7 @@ def functioncall(c, m):
         dx = someMethod(8)
     """
     assigned_to = m.group(1)
-    params = Function.get_params(m.group(3))
+    params = get_csv(m.group(3))
 
     # Find the function
     function = c.find_matching_function(

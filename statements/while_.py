@@ -1,5 +1,5 @@
 from .statement import Statement
-from .utils import cti, ctoi
+from utils import cti, ctoi
 
 
 def while_(c, m):

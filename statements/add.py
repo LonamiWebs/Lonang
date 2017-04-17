@@ -1,5 +1,5 @@
 from .statement import Statement
-from .utils import parseint
+from utils import parseint
 
 
 def add(c, m):

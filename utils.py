@@ -48,6 +48,20 @@ def parseint(value):
         return None
 
 
+def get_csv(values):
+    """If 'values' is not a list already, converts the values
+        to a list of values, comma separated
+    """
+    if isinstance(values, list):
+        return values
+
+    values = values.strip()
+    if values:
+        return [v.strip() for v in values.split(',')]
+    else:
+        return []
+
+
 def is_register(name):
     """Returns True if the given 'name' is a register"""
     if len(name) != 2:

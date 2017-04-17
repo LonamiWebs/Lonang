@@ -1,5 +1,5 @@
 from .statement import Statement
-from .utils import ctoi
+from utils import ctoi
 
 
 def if_(c, m):
