@@ -98,13 +98,16 @@ def helperassign(c, dst, src):
 
         elif dst_size < src_size:
             # The destination is smaller, we have to ignore the high part
-            if src_memo:
-                # # # [Case large memory to small register]
+            if src_memo or src[-1] != 'x':
+                # # # [Case large memory/register to small register]
                 # The source is memory, then the destination is a register
                 #
                 # We need an auxiliary register because we don't want to
                 # touch the other part (either of r'[HL]'), and we can't
                 # pop a masked value not to lose the rest
+                #
+                # This is also the case when the source is not memory, but
+                # the register doesn't support accessing r'[HL]'
                 #
                 # Use either 'dx' or 'ax' as auxiliar register (arbitrary
                 # as long as it doesn't match the one we want to move to)
@@ -115,17 +118,10 @@ def helperassign(c, dst, src):
                 c.add_code(f'pop {aux}')
             else:
                 # # # [Case large register to small register/memory]
-                # The source is not memory, we might not need moving it
-                # if we can directly access to the low part of the register
-                if src[1] == 'x':
-                    c.add_code(f'mov {dst}, {src[0]}l')
-                else:
-                    # TODO Reuse code instead copying and pasting
-                    aux = 'dx' if dst[0] == 'a' else 'ax'
-                    c.add_code(f'push {aux}')
-                    c.add_code(f'mov {aux}, {src}')
-                    c.add_code(f'mov {dst}, {aux[0]}l')
-                    c.add_code(f'pop {aux}')
+                # We know that we have acces to the low part since it was
+                # checked above, otherwise we would have needed that
+                # auxiliary to be able to pick only the low part
+                c.add_code(f'mov {dst}, {src[0]}l')
 
         else:
             # The destination is larger, we need to mask the high part.
