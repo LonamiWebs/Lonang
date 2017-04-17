@@ -1,5 +1,5 @@
 from .statement import Statement
-from utils import helperassign
+from utils import helperassign, get_csv
 
 
 def assign(c, m):
@@ -10,6 +10,6 @@ def assign(c, m):
 
 
 assign_statement = Statement(
-    r'(\w+) = (VALUE)',
+    r'(CSV) = (CSV)',
     assign
 )

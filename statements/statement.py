@@ -31,6 +31,7 @@ class Statement:
             '^' and '$' will be prepended and appended, respectively
 
             'VALUE' will be replaced with '[\w\d]+' to match registers/numbers
+            'CSV' will be replaced with '[\w]+(?: , [\w]+)*'
 
             ' ' (one space) will be replaced with r'\s*'
             '  ' (two spaces) will be replaced with r'\s+'
@@ -38,6 +39,7 @@ class Statement:
             '(?:\s*@(\w+))?' will be added to the end to allow @labelname
         """
         sanitized = string.replace('VALUE', r'[\w\d]+')
+        sanitized = sanitized.replace('CSV', r'[\w]+(?: , [\w]+)*')
         sanitized = sanitized.replace('  ', r'\s+').replace(' ', r'\s*')
         sanitized = sanitized + r'(?:\s*@(\w+))?'
         return re.compile('^' + sanitized + '$')

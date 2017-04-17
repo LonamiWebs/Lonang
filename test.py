@@ -32,8 +32,10 @@ function gcd(ax, bx) returns ax {
     }
 }
 
-ax = 4
-bx = 6
+ax = 6
+bx = 4
+ax, bx = bx, ax
+
 ax += bx
 
 if bx == 6 { @primerIf
@@ -60,6 +62,8 @@ repeat 2 with cx { @primerLoop
 dx = myMethod(7, 3)
 
 ax = gcd(35, 15)
+printf "gcd(35, 17) = %d\r\n" % ax
+
 ax = gcd(211, 173)
 
 ax = 10

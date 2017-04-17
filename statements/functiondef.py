@@ -24,6 +24,6 @@ def functiondef(c, m):
 
 
 functiondef_statement = Statement(
-    r'function (%s) \(([\w, ]+)\)(?: returns (\w+))? {' % FUNC_NAME_RE,
+    r'function (%s) \((CSV)\)(?: returns (\w+))? {' % FUNC_NAME_RE,
     functiondef
 )
