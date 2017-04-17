@@ -120,11 +120,17 @@ def helperassign(c, dst, src):
             # so we already know that we have access to the 'X' version
             # unless the source is memory
             if src_memo:
-                c.add_code(f'push ax')
-                c.add_code(f'xor ah, ah')
-                c.add_code(f'mov al, {src}')
-                c.add_code(f'mov {dst}, ax')
-                c.add_code(f'pop ax')
+                # Check if the register supports accessing to the r'[HL]'
+                # Otherwise we need to use a temporary register such as 'ax'
+                if dst[-1] == 'x':
+                    c.add_code(f'xor {dst[0]}h, {dst[0]}h')
+                    c.add_code(f'mov {dst[0]}l, {src}')
+                else:
+                    c.add_code(f'push ax')
+                    c.add_code(f'xor ah, ah')
+                    c.add_code(f'mov al, {src}')
+                    c.add_code(f'mov {dst}, ax')
+                    c.add_code(f'pop ax')
             else:
                 c.add_code(f'push {src[0]}x')
 
