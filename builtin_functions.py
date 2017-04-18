@@ -11,7 +11,7 @@ def define_integer_to_string(c):
     """
     vname = '_v_itos'
     fname = '_f_itos'
-    function = Function(fname, params=['ax'], returns=vname)
+    function = Function(fname, params=['ax'], returns=vname, mangle=False)
 
     # Early exit if it's already defined
     if fname in c.functions:
@@ -73,7 +73,7 @@ def define_set_cursor(c):
         Returns the Function header.
     """
     fname = '_f_setc'
-    function = Function(fname, params=['dx'])
+    function = Function(fname, params=['dx'], mangle=False)
 
     # Early exit if it's already defined
     if fname in c.functions:
