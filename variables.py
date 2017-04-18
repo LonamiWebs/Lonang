@@ -1,22 +1,36 @@
+from utils import get_csv
+
+
 class Variable:
-    def __init__(self, name, vartype, value):
+    def __init__(self, name, vartype, value, vector_size=None):
         self.name = name
-        self.value = value.strip()
 
-        # If the type ends with ']' then it probably is a vector
-        self.is_vector = vartype.endswith(']') and '[' in vartype
+        # 'vector_size' should be None for non-vector types
+        self.is_vector = vector_size is not None
         if self.is_vector:
-            vartype, self.length = vartype.split('[')
-            try:
-                self.length = int(self.length[:-1].strip())
-            except ValueError:
-                raise ValueError(f'Unknown length value "{self.length[:-1]}"')
+            if vector_size < 1:
+                raise ValueError('Vector size must be ≥ 1')
 
+            self.value = get_csv(value)
+            self.length = vector_size
+            # One value is OK with any vector size, 'dup()' is assumed
+            if len(self.value) != 1 and self.length != len(self.value):
+                raise ValueError(
+                    f'Specified vector length ({self.length}) and supplied '
+                    f'values count ({len(self.value)}) do not match')
+        else:
+            # Not a vector, so save its single value
+            self.value = value.strip()
+
+        # Name and vector handled, now define the type
         self.type = vartype
 
         # Type defined, now determine its code
         self.is_constant = vartype == 'const'
         if self.is_constant:
+            if self.is_vector:
+                raise ValueError('Cannot define a constant vector')
+
             self.typecode = None
         else:
             if vartype == 'byte':
@@ -28,6 +42,9 @@ class Variable:
                 self.size = 16
 
             elif vartype == 'string':
+                if self.is_vector:
+                    raise ValueError('Cannot define a vector of strings')
+
                 self.typecode = 'DB'
                 self.size = 8
                 self.value = self.escape_string(value)
@@ -69,8 +86,10 @@ class Variable:
         """Returns the code representation for
             the definition of this variable"""
         if self.is_vector:
-            # TODO Support for non-duplicate values, thus length inferred
-            return f'{self.name} {self.typecode} {self.length} dup({self.value})'
+            if len(self.value) != self.length:
+                return f'{self.name} {self.typecode} {self.length} dup({self.value[0]})'
+            else:
+                return f'{self.name} {self.typecode} {", ".join(self.value)}'
         else:
             return f'{self.name} {self.typecode} {self.value}'
 

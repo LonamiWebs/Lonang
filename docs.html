@@ -60,7 +60,13 @@
     <h2 id="index">Index</h2>
     <ul>
         <li><a href="#general">General</a></li>
-        <li><a href="#variables">Variables</a></li>
+        <li>
+            <a href="#variables">Variables</a>
+            <ul>
+                <li><a href="#registers">Registers</li>
+                <li><a href="#vectors">Vectors</li>
+            </ul>
+        </li>
         <li><a href="#comments">Comments</a></li>
         <li>
             <a href="#control-flow">Control flow</a>
@@ -123,6 +129,7 @@ ax, bx = bx, ax
     modifies a variable, the changes are reflected upon the whole file.
     One should be careful with this.</p>
 
+    <h3 id="registers">Registers</h3>
     <p>There exist certain "special" variables which directly correspond
     with the <b>registers</b> of the underlying machine. These are also global.
     One should always use registers when possible, since they're faster to
@@ -148,6 +155,67 @@ ax, bx = bx, ax
     <p>The first four point to the application segments, such as data and
     code, and the last two point to the stack. Modifying any of these will
     result in unpredictable results.</p>
+
+    <h3 id="vectors">Vectors</h3>
+    <p>It's possible to define a <i>vector</i> of values by appending
+    <code>[]</code> to the variable type. Vectors, also known as <i>arrays</i>
+    in other languages, support containing one or more values under the same
+    variable, which can be later be <i>indexed</i> if one desires to access
+    its contents. The <code>length</code> of the vector will be infered by
+    the amount of comma separated values specified. It's also possible to
+    explicitly define its length inside the square braces. If only one
+    value is supplied, and the given size is different, this value will be
+    duplicated accross the vector.</p>
+
+    <p>Some <b>valid</b> examples for defining vectors are:</p>
+<pre>byte[] v1 = 14
+short[] = 10, 20, 30
+
+short[1] v2 = 6
+byte[5] v3 = 2, 3, 5, 7, 11
+
+byte[42] v4
+byte[6] v5 = ?  ; The '?' denotes we don't care about its actual value
+byte[9] v6 = 7
+</pre>
+
+    <p>Some <b>invalid</b> examples for defining vectors are:</p>
+<pre>short[1] v1 = 6, 5
+byte[5] v2 = 2, 3, 5
+</pre>
+
+    <p>In order to access a vector, one can make use of either an inmediate
+    value, such as <code>[2]</code> to access the <b>third</b> item of the
+    vector (since <code>[0]</code> denotes the <b>first</b> element), any
+    variable, or some added together. It's important to note, however,
+    that in order to be as efficient as possible, one should use the
+    <b>i</b>ndex registers (si and di), possibly adding to them the <b>b</b>x
+    as the <b>b</b>ase register. The following combinations would cause
+    no trouble, assuming <code>vector</code> is a vector variable:</p>
+
+<pre>vector[bx] = 1
+vector[si] = 2
+vector[di] = 3
+
+vector[bx+4] = 4
+vector[si-5] = 5
+vector[di+6] = 6
+
+vector[bx+si] = 7
+vector[bx-di] = 8
+
+vector[bx-si+9] = 9
+vector[bx+di-10] = 10
+</pre>
+
+    <p><b>Any other combination</b> will need to be translated to some of these,
+    probably causing a <b>lot of overhead</b>. It is strongly encouraged to
+    use the mentioned registers whenever possible.</p>
+
+    <p>The length of the vector cannot be changed on runtime, and can be
+    queried on compile time by accessing <code>vector.length</code> which
+    will be replaced with its actual length.</p>
+    <!-- TODO Make all this of vectors true! -->
 
     <h2 id="comments">Comments</h2>
     <p>Inline comments can be specified after the statement, separated by

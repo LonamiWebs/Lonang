@@ -18,7 +18,7 @@ def define_integer_to_string(c):
         return function
 
     maxlen = len(f'-{0x7FFF}$')
-    c.add_variable(Variable(vname, f'byte[{maxlen}]', '?'))
+    c.add_variable(Variable(vname, 'byte', '?', vector_size=maxlen))
 
     c.begin_function(function)
     c.add_code('''push bx
