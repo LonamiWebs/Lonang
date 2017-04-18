@@ -94,6 +94,9 @@ def helperassign(c, dst, src):
         if dst_size == src_size:
             # # # [Case same size]
             # Both sizes are the same, we can directly move the values
+            # This should be the only move out there, if other moves
+            # are required below they should recursively call helperassign()
+            # to optimize this line away if 'dst' and 'src' are the same
             c.add_code(f'mov {dst}, {src}')
 
         elif dst_size < src_size:
@@ -113,15 +116,15 @@ def helperassign(c, dst, src):
                 # as long as it doesn't match the one we want to move to)
                 aux = 'dx' if dst[0] == 'a' else 'ax'
                 c.add_code(f'push {aux}')
-                c.add_code(f'mov {aux}, {src}')
-                c.add_code(f'mov {dst}, {aux[0]}l')
+                helperassign(c, aux, src)
+                helperassign(c, dst, f'{aux[0]}l')
                 c.add_code(f'pop {aux}')
             else:
                 # # # [Case large register to small register/memory]
                 # We know that we have acces to the low part since it was
                 # checked above, otherwise we would have needed that
                 # auxiliary to be able to pick only the low part
-                c.add_code(f'mov {dst}, {src[0]}l')
+                helperassign(c, dst, f'{src[0]}l')
 
         else:
             # The destination is larger, we need to mask the high part.
@@ -134,12 +137,12 @@ def helperassign(c, dst, src):
                 # Otherwise we need to use a temporary register such as 'ax'
                 if dst[-1] == 'x':
                     c.add_code(f'xor {dst[0]}h, {dst[0]}h')
-                    c.add_code(f'mov {dst[0]}l, {src}')
+                    helperassign(c, f'{dst[0]}l', src)
                 else:
                     c.add_code(f'push ax')
                     c.add_code(f'xor ah, ah')
-                    c.add_code(f'mov al, {src}')
-                    c.add_code(f'mov {dst}, ax')
+                    helperassign(c, 'al', src)
+                    helperassign(c, dst, 'ax')
                     c.add_code(f'pop ax')
             elif dst_memo:
                 # # # [Case small register to large memory]
@@ -149,16 +152,16 @@ def helperassign(c, dst, src):
 
                 # We might need to move the high to the low part before masking
                 if src[1] == 'h':
-                    c.add_code(f'mov {src[0]}l, {src[0]}h')
+                    helperassign(c, f'{src[0]}l', f'{src[0]}h')
                 c.add_code(f'xor {src[0]}h, {src[0]}h')
 
-                c.add_code(f'mov {dst}, {src[0]}x')
+                helperassign(c, dst, f'{src[0]}x')
                 c.add_code(f'pop {src[0]}x')
             else:
                 # # # [Case small register to large register]
                 # All the 8 bit registers support accessing to 'X', so we
                 # can just move the whole register and mask away the high part
-                c.add_code(f'mov {dst}, {src[0]}x')
+                helperassign(c, dst, f'{src[0]}x')
                 c.add_code(f'xor {dst[0]}h, {dst[0]}h')
 
         # Single assignment done, early exit
