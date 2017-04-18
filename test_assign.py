@@ -10,7 +10,6 @@ byte lnumber = 0
 
 ; Register to self ;
 
-; Use 'ax' because it causes 0 issues with printf...
 ax = 0x901
 ax = ax
 printf("ax should be 2305 and is %d\r\n", ax)

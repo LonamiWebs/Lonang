@@ -39,6 +39,7 @@ class Variable:
     def escape_string(string):
         """Escapes the given string so it's valid to be assigned to a
             string variable"""
+        # TODO Ensure it's a valid string, and that it's not already formatted
         analyzed = string.strip('"').encode('ascii').decode('unicode_escape')
         quote_open = False
         result = ''

@@ -9,12 +9,21 @@ def define_and_print(c, string):
     """Defines a new variable with an unique name
         for 'string', and prints it to the screen
     """
-    if string:
+    if not string or not string.strip('"'):
+        return
+
+    # First try finding an existing string variable with the same content
+    # that we wish, if it exists, don't waste memory creating yet another one
+    enc = Variable.escape_string(string)
+    var = next((v for v in c.variables.values() if v.value == enc), None)
+    if not var:
+        # No luck, create a new variable TODO This will escape the string again!
         var = Variable(c.get_uid(), 'string', string)
-        if var.value != "'$'":
-            c.add_variable(var)
-            c.add_code(f'lea dx, {var.name}')
-            c.add_code(f'int 21h')
+        c.add_variable(var)
+
+    # Now we have an existing variable with the content we want to show
+    c.add_code(f'lea dx, {var.name}')
+    c.add_code(f'int 21h')
 
 
 def load_integer(c, var_name):
