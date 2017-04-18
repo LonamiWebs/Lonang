@@ -151,7 +151,7 @@ def helperassign(c, dst, src):
                 c.add_code(f'push {src[0]}x')
 
                 # We might need to move the high to the low part before masking
-                if src[1] == 'h':
+                if src[-1] == 'h':
                     helperassign(c, f'{src[0]}l', f'{src[0]}h')
                 c.add_code(f'xor {src[0]}h, {src[0]}h')
 
@@ -159,10 +159,29 @@ def helperassign(c, dst, src):
                 c.add_code(f'pop {src[0]}x')
             else:
                 # # # [Case small register to large register]
-                # All the 8 bit registers support accessing to 'X', so we
-                # can just move the whole register and mask away the high part
-                helperassign(c, dst, f'{src[0]}x')
-                c.add_code(f'xor {dst[0]}h, {dst[0]}h')
+                if src[-1] == 'l':
+                    # We're using the low part, we can directly copy
+                    # and then mask the high part with AND or XOR
+                    helperassign(c, dst, f'{src[0]}x')
+                    if dst[-1] == 'x':
+                        c.add_code(f'xor {dst[0]}h, {dst[0]}h')
+                    else:
+                        c.add_code(f'and {dst}, 0xff')
+                else:
+                    # We want to assign the src = YH, but it's 8-bits
+                    if dst[-1] == 'x':
+                        # Destination supports 8-bits access so we can
+                        # directly move those and mask away the high part
+                        helperassign(c, f'{dst[0]}l', src)
+                        c.add_code(f'xor {dst[0]}h, {dst[0]}h')
+                    else:
+                        # No support to move the 8-bits directly, we need
+                        # to save the value, move it, mask it, and move it
+                        c.add_code(f'push {src[0]}x')
+                        helperassign(c, f'{src[0]}l', src)
+                        c.add_code(f'xor {src}, {src}')
+                        helperassign(c, dst, f'{src[0]}x')
+                        c.add_code(f'pop {src[0]}x')
 
         # Single assignment done, early exit
         return
