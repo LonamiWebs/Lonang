@@ -13,6 +13,6 @@ def sub(c, m):
 
 
 sub_statement = Statement(
-    r'(\w+) -= (VALUE)',
+    r'(VAR) -= (INM)',
     sub
 )

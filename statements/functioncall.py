@@ -33,6 +33,6 @@ def functioncall(c, m):
 
 
 functioncall_statement = Statement(
-    r'(?:(\w+) = )?(\w+)\((CSV)\)',
+    r'(?:(VAR) = )?(VAR) \((CSINM)\)',
     functioncall
 )

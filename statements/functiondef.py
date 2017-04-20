@@ -1,5 +1,5 @@
 from .statement import Statement
-from functions import Function, FUNC_NAME_RE
+from functions import Function
 
 
 def functiondef(c, m):
@@ -24,6 +24,6 @@ def functiondef(c, m):
 
 
 functiondef_statement = Statement(
-    r'function (%s) \((CSV)\)(?: returns (\w+))? {' % FUNC_NAME_RE,
+    r'function (VAR) \((CSVAR)\)(?: returns (VAR))? {',
     functiondef
 )

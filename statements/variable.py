@@ -55,7 +55,7 @@ def variable(c, m):
 
 variable_statement = Statement(
     #   Type for the variable        vector   or' '      optional value
-    r'(byte|short|string|const)(?: (\[ \d* \]) |  )(\w+)(?: = (.+))?',
+    r'(byte|short|string|const)(?: (\[ \d* \]) |  )(VAR)(?: = (.+))?',
     #                                              name
     variable
 )

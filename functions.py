@@ -30,8 +30,3 @@ class Function:
 
 class FunctionEnd():
     """Dummy special value when popping a closed brace"""
-
-
-# Underscore not supported must start with a letter
-# TODO This could probably be used on variable names too
-FUNC_NAME_RE = r'[A-Za-z][A-Za-z0-9]*'

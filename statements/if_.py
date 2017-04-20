@@ -17,6 +17,6 @@ def if_(c, m):
 
 
 if_statement = Statement(
-    r'if  (\w+) ([<>=!]+) (VALUE) {',
+    r'if  (VAR) ([<>=!]+) (INM) {',
     if_
 )

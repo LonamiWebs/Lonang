@@ -11,6 +11,6 @@ def assign(c, m):
 
 
 assign_statement = Statement(
-    r'(CSV) = (CSV)',
+    r'(CSVAR) = (CSINM)',
     assign
 )

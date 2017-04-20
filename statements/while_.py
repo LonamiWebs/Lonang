@@ -35,6 +35,6 @@ def while_(c, m):
 
 
 while_statement = Statement(
-    r'while  (\w+) ([<>=!]+) (VALUE)  (or once)? {',
+    r'while  (VAR) ([<>=!]+) (INM)  (or once)? {',
     while_
 )

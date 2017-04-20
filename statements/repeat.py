@@ -40,6 +40,6 @@ def repeat(c, m):
 
 
 repeat_statement = Statement(
-    r'repeat  (VALUE)  with  (\w+) {',
+    r'repeat  (INM)  with  (VAR) {',
     repeat
 )

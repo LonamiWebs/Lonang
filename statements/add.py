@@ -13,6 +13,6 @@ def add(c, m):
 
 
 add_statement = Statement(
-    r'(\w+) \+= (VALUE)',
+    r'(VAR) \+= (INM)',
     add
 )

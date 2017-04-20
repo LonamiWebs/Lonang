@@ -26,20 +26,33 @@ class Statement:
             return False
 
     @staticmethod
-    def recompile(string):
+    def assert_operands(c, left, right):
+        pass
+
+    @staticmethod
+    def recompile(s):
         """Used to compile "readable" regexes, with the following changes:
             '^' and '$' will be prepended and appended, respectively
 
-            'VALUE' will be replaced with '[\w\d]+' to match registers/numbers
-            'CSV' will be replaced with '[\w]+(?: , [\w]+)*'
+            'CSINM' -> 'INM(?: , INM)*'
+            'CSVAR' -> 'VAR(?: , VAR)*'
 
-            ' ' (one space) will be replaced with r'\s*'
-            '  ' (two spaces) will be replaced with r'\s+'
+            'INM' -> r"VAR|(?:0[xbXB])?\d+[hbHB]?|'\\?.'" to match an inmediate
+            'VAR' -> '[^_\W\d](?:\w)*(?:\[\d+\])?' to match a variable/register
+
+            '  ' (two spaces) -> r'\s+'
+            ' ' (one space) -> r'\s*'
 
             '(?:\s*@(\w+))?' will be added to the end to allow @labelname
         """
-        sanitized = string.replace('VALUE', r'[\w\d]+')
-        sanitized = sanitized.replace('CSV', r'[\w]+(?: , [\w]+)*')
-        sanitized = sanitized.replace('  ', r'\s+').replace(' ', r'\s*')
-        sanitized = sanitized + r'(?:\s*@(\w+))?'
-        return re.compile('^' + sanitized + '$')
+        if 'IMN' in s:
+            raise ValueError('Typo "IMN" (probably meant "INM")')
+
+        s = s.replace('CSINM', r'(?:INM)(?: , (?:INM))*')
+        s = s.replace('CSVAR', r'(?:VAR)(?: , (?:VAR))*')
+        s = s.replace('INM', r"(?:VAR)|(?:0[xbXB])?\d+[hbHB]?|'\\?.'")
+        s = s.replace('VAR', r'[^_\W\d](?:\w)*(?:\[ [\dsdibx+\- ]+\ ])?')
+        s = s.replace('  ', r'\s+')
+        s = s.replace(' ', r'\s*')
+
+        return re.compile('^' + s + '(?:\s*@(\w+))?$')

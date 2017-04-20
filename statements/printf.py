@@ -154,7 +154,7 @@ def printf(c, m):
 
 printf_statement = Statement(
     #          A string possibly formatted
-    r'printf \( ("[\s\S]+") (?:, (CSV))? \)|printf \( (\w+) \)',
+    r'printf \( ("[\s\S]+") (?:, (CSINM))? \)|printf \( (INM) \)',
     #                                         Or a single var
 
     printf
