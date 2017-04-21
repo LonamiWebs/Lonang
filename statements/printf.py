@@ -1,6 +1,6 @@
 from .statement import Statement
 from variables import Variable
-from utils import helperassign, get_csv, is_register
+from utils import helperassign
 from builtin_functions import define_integer_to_string, define_tmp_variable
 import re
 
@@ -26,21 +26,21 @@ def define_and_print(c, string):
     c.add_code(f'int 21h')
 
 
-def load_integer(c, var_name):
-    """Converts the given integer variable into a string
+def load_integer(c, op):
+    """Converts the given integer operand into a string
         and loads it to dx, so it's ready to be printed
     """
     itos = define_integer_to_string(c)
-    helperassign(c, itos.params[0], var_name)
+    helperassign(c, itos.params[0], op)
     c.add_code(f'call {itos.name}')
     # AX was lost, we need to set the right value again TODO Improve ITOS!!
     c.add_code(f'mov ah, 9')
     c.add_code(f'lea dx, {itos.returns}')
 
 
-def is_ax_or_dx_variant(register):
+def is_ax_or_dx_variant(op):
     """Returns True if the register is 'ax', 'dx' or a variant"""
-    return register[0] in 'ad' and register[1] in 'xhl'
+    return op[0] in 'ad' and op[-1] in 'xhl'
 
 
 def printf(c, m):
@@ -62,7 +62,7 @@ def printf(c, m):
     #
     # Retrieve the captured values
     string = m.group(1)
-    args = get_csv(m.group(2))
+    args = c.get_operands(m.group(2))
     var = m.group(3)
 
     # Save the registers used for calling the print interruption
@@ -71,29 +71,27 @@ def printf(c, m):
 
     # string/args and var are mutually exclusive
     if var:
-        # Captured a single variable, which means no formatting
-        if var in c.variables:
+        op = Operand(c, var, assert_vector_access=False)
+        if op.is_mem:
             # Using a variable, load and call the interruption
-            variable = c.variables[var]
-
-            if variable.type == 'string':
-                c.add_code(f'lea dx, {variable.name}')
+            if op.type == 'string':
+                c.add_code(f'lea dx, {op}')
             else:
-                load_integer(c, variable.name)
+                load_integer(c, op.code)
 
             c.add_code(f'mov ah, 9')
             c.add_code(f'int 21h')
 
-        elif is_register(var):
+        elif op.is_reg:
             # Using a register, which means we need to load an integer
-            load_integer(c, var)
+            load_integer(c, op)
             c.add_code(f'mov ah, 9')
             c.add_code(f'int 21h')
 
         else:
             # Assume inmediate integer value
             c.add_code(f'mov ah, 9')
-            define_and_print(c, f'"{var}"')
+            define_and_print(c, f'"{op.name}"')
 
     else:
         # Captured a string, with possibly formatted arguments
@@ -120,24 +118,24 @@ def printf(c, m):
             for i in range(len(substrings)):
                 if i > 0:
                     # Format the arguments, skipping 1 normal string (thus -1)
-                    var_name = args[i-1]
-                    arg_type = arg_types[i-1]
+                    op = args[i-1]
+                    format_type = arg_types[i-1]
 
                     # Load the argument into 'dx' depending on its type
                     #
                     # This assumes that the user entered the right type
                     # TODO Don't assume that the user entered the right type
-                    if arg_type == '%s':
-                        c.add_code(f'lea dx, {var_name}')
-                    elif arg_type == '%d':
-                        if is_ax_or_dx_variant(var_name):
+                    if format_type == '%s':
+                        c.add_code(f'lea dx, {op}')
+                    elif format_type == '%d':
+                        if is_ax_or_dx_variant(op):
                             # Special, this was saved previously
-                            load_integer(c, define_tmp_variable(c, var_name))
+                            load_integer(c, define_tmp_variable(c, op))
                             c.add_code('mov ah, 9')
                         else:
-                            load_integer(c, var_name)
+                            load_integer(c, op)
                     else:
-                        raise ValueError(f'Regex should not have allowed {arg_type}')
+                        raise ValueError(f'Regex should not have allowed {format_type}')
 
                     # Call the interruption to print the argument
                     c.add_code(f'int 21h')

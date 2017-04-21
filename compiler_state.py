@@ -1,5 +1,7 @@
 import re
 from functions import Function, FunctionEnd
+from operands import Operand
+from utils import get_csv
 
 
 class CompilerState:
@@ -66,10 +68,25 @@ class CompilerState:
 
     def apply_constants(self, code):
         """Applies the available constants to the given line of code"""
+        code = str(code)
         for constant, value in self.constants.values():
             code = constant.sub(value, code)
 
         return code
+
+    def get_operands(self, csv):
+        """Converts the possibly comma separated values to a
+            list of operands (inmediate, registers and variables
+        """
+        if isinstance(csv, list):
+            return [v if isinstance(v, Operand)
+                      else Operand(self, v)
+                      for v in csv]
+
+        if isinstance(csv, Operand):
+            return [csv]
+
+        return [Operand(self, v) for v in get_csv(csv)]
 
     def find_matching_function(self, name, param_count, must_return):
         """Finds and returns the function definition which

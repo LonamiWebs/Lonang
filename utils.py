@@ -1,3 +1,6 @@
+from operands import Operand
+
+
 # Compare To jump Instruction
 cti = {
     '<': 'jl',
@@ -23,63 +26,37 @@ def helperassign(c, dst, src):
     """Helper assign with support for assigning 8 bits to 16
         and vice versa, as well as assigning multiple values
         at once"""
-    if dst == src:
-        return
+    dst = c.get_operands(dst)
+    src = c.get_operands(src)
 
-    dst = get_csv(dst)
-    src = get_csv(src)
     if len(dst) != len(src):
         raise ValueError('The amount of values to assign do not match')
 
+    if dst == src:
+        return
+
     # Single assignment with support for mixed sizes (8 and 16)
     if len(dst) == 1:
-        dst = c.apply_constants(dst[0])
-        src = c.apply_constants(src[0])
+        dst = dst[0]
+        src = src[0]
 
         # Sanity check: destination cannot be an inmediate value
-        if parseint(dst) is not None:
-            raise ValueError(f'Cannot assign {src} to the inmediate value {dst}')
+        if dst.value is not None:
+            raise ValueError(f'Cannot assign "{src.name}" to the inmediate value "{dst.name}"')
 
-        # Determine the variables size and location before everything else
-        if is_register(dst):
-            dst_size = register_size(dst)
-            dst_memo = False
-        else:
-            var = c.variables.get(dst, None)
-            if var is None:
-                raise ValueError(f'Cannot assign to the unknown variable "{dst}"')
-            dst_size = var.size
-            dst_memo = True
-
-        # Before determining the size of the source register, check if it is
-        # an inmediate value, in which case we only need to make sure that
-        # the value is inside the bounds of the destination size
-        src_value = parseint(src)
-        if src_value is not None:
-            minimum = -(2 ** (dst_size - 1))
-            maximum = 2 ** dst_size
-            if not minimum <= src_value < maximum:
-                raise ValueError(f'{src_value} is too big to fit in "{dst}"')
+        # If the source has an integer value, make sure it fits on destination
+        if src.value is not None:
+            if src.size > dst.size:
+                raise ValueError(f'"{src.name}" is too big to fit in "{dst.name}"')
 
             # It's an okay inmediate value, simply assign it and early exit
-            c.add_code(f'mov {dst}, {src_value}')
+            c.add_code(f'mov {dst}, {src}')
             return
-
-        # If we're here, it has to be either a register or a variable
-        if is_register(src):
-            src_size = register_size(src)
-            src_memo = False
-        else:
-            var = c.variables.get(src, None)
-            if var is None:
-                raise ValueError(f'Cannot assign to the unknown variable "{src}"')
-            src_size = var.size
-            src_memo = True
 
         # Special case where both are memory, we need to use a temporary
         # register ('ax' for instance); recursive calls to helperassign()
         # will then take care of the cases where assigning memory + 'ax'
-        if dst_memo and src_memo:
+        if dst.is_mem and src.is_mem:
             # # # [Case memory to memory]
             # TODO This will have strange results when size dst > size src,
             #      since no masking will be performed on 'ax'
@@ -91,7 +68,7 @@ def helperassign(c, dst, src):
 
         # Now that we know the size, and that not both are memory,
         # we can get our hands dirty
-        if dst_size == src_size:
+        if dst.size == src.size:
             # # # [Case same size]
             # Both sizes are the same, we can directly move the values
             # This should be the only move out there, if other moves
@@ -99,9 +76,9 @@ def helperassign(c, dst, src):
             # to optimize this line away if 'dst' and 'src' are the same
             c.add_code(f'mov {dst}, {src}')
 
-        elif dst_size < src_size:
+        elif dst.size < src.size:
             # The destination is smaller, we have to ignore the high part
-            if src_memo or src[-1] != 'x':
+            if src.is_mem or src[-1] != 'x':
                 # # # [Case large memory/register to small register]
                 # The source is memory, then the destination is a register
                 #
@@ -131,7 +108,7 @@ def helperassign(c, dst, src):
             # The only case where this is possible is on r'[ABCD][HL]',
             # so we already know that we have access to the 'X' version
             # unless the source is memory
-            if src_memo:
+            if src.is_mem:
                 # # # [Case small memory to large register]
                 # Check if the register supports accessing to the r'[HL]'
                 # Otherwise we need to use a temporary register such as 'ax'
@@ -144,7 +121,7 @@ def helperassign(c, dst, src):
                     helperassign(c, 'al', src)
                     helperassign(c, dst, 'ax')
                     c.add_code(f'pop ax')
-            elif dst_memo:
+            elif dst.is_mem:
                 # # # [Case small register to large memory]
                 # All the 8 bit registers support accessing to 'X', so we
                 # can just mask away the high part, move it and restore
@@ -277,29 +254,16 @@ def parseint(value):
 
 
 def get_csv(values):
-    """If 'values' is not a list already, converts the values
-        to a list of values, comma separated
+    """If 'values' is not a list already, converts the
+        comma separated values to a list of STRING values
     """
+    if not values:
+        return []
+
     if isinstance(values, list):
         return values
 
-    if values and values.strip():
+    if values.strip():
         return [v.strip() for v in values.split(',')]
     else:
         return []
-
-
-def is_register(name):
-    """Returns True if the given 'name' is a register"""
-    if len(name) != 2:
-        return False
-
-    if name[0] in 'abcd' and name[1] in 'xhl':
-        return True
-
-    return name in ('si', 'di', 'cs', 'ds', 'ss', 'sp', 'bp', 'es')
-
-
-def register_size(name):
-    """Returns the size of the register, or 16 if it's not a register"""
-    return 8 if name[1] in 'hl' else 16
