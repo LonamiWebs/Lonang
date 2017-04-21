@@ -37,8 +37,8 @@ class Statement:
             'CSINM' -> 'INM(?: , INM)*'
             'CSVAR' -> 'VAR(?: , VAR)*'
 
-            'INM' -> r"VAR|(?:0[xbXB])?\d+[hbHB]?|'\\?.'" to match an inmediate
-            'VAR' -> '[^_\W\d](?:\w)*(?:\[\d+\])?' to match a variable/register
+            'INM' -> r"(?:VAR|(?:0[xbXB])?\d+[hbHB]?|'\\?.')"
+            'VAR' -> '[^_\W\d](?:\w)*(?:\[\d+\])?' (for variable/register)
 
             '  ' (two spaces) -> r'\s+'
             ' ' (one space) -> r'\s*'
@@ -50,7 +50,7 @@ class Statement:
 
         s = s.replace('CSINM', r'(?:INM)(?: , (?:INM))*')
         s = s.replace('CSVAR', r'(?:VAR)(?: , (?:VAR))*')
-        s = s.replace('INM', r"(?:VAR)|(?:0[xbXB])?\d+[hbHB]?|'\\?.'")
+        s = s.replace('INM', r"(?:VAR|(?:0[xbXB])?\d+[hbHB]?|'\\?.')")
         s = s.replace('VAR', r'[^_\W\d](?:\w)*(?:\[ [\dsdibx+\- ]+\ ])?')
         s = s.replace('  ', r'\s+')
         s = s.replace(' ', r'\s*')

@@ -390,7 +390,7 @@ dx = multiply(bx, ax)
 <pre>
 ; Store (ax divided by bx) in ax
 ; Store (ax modulo bx) in dx
-ax, dx = divmod(ax, bx)
+ax, dx = divmod ax, bx
 </pre>
 
     <p>Note that due how this function works and to guarantee that no data is
@@ -424,9 +424,9 @@ ax, dx = divmod(ax, bx)
 string person = "User"
 short favourite = 42
 
-printf(hello)
-printf("Hello %s! I see you like the number %d", person, favourite)
-printf("\r\nExiting...\r\n")</pre>
+printf hello
+printf "Hello %s! I see you like the number %d", person, favourite
+printf "\r\nExiting...\r\n"</pre>
 
     <p>If two subsequent calls were to be made to <code>printf</code>,
     it's recommended to use <code>printf("%s%s", str1, str2)</code> since
@@ -436,8 +436,8 @@ printf("\r\nExiting...\r\n")</pre>
     <p>This function allows to freely <b>set the cursor</b> on the screen.
     The list of parameters to be supplied are, in this order, the <i>row</i>
     and then the <i>column</i> to which the cursor should move:</p>
-<pre>setcursor(12, 37)
-printf("Middle")</pre>
+<pre>setcursor 12, 37
+printf "Middle"</pre>
 
     <p>Since the screen defaults to 80 columns and 25 rows, in this case,
     <code>12, 37</code> would be able to print <code>"Middle"</code> on

@@ -27,7 +27,7 @@ function myMethod(ax, bx) returns number {
 
 function gcd(ax, bx) returns ax {
     if bx != 0 {
-        ax, dx = divmod(ax, bx)
+        ax, dx = divmod ax, bx
         ax = gcd(bx, dx)
     }
 }
@@ -62,18 +62,18 @@ repeat 2 with cx { @primerLoop
 dx = myMethod(7, 3)
 
 ax = gcd(35, 15)
-printf("gcd(35, 15) = %d\r\n", ax)
+printf "gcd(35, 15) = %d\r\n", ax
 
 ax = gcd(211, 173)
 
 ax = 10
 bx = 3
-ax, dx = divmod(ax, bx)
+ax, dx = divmod ax, bx
 
-printf("%s, hello %s! How come you've came to %s\r\n", place, person, place)
+printf "%s, hello %s! How come you've came to %s\r\n", place, person, place
 
-setcursor(12, little)
-printf("ax=%d, bx=%d, cx=%d, dx=%d", ax, bx, cx, dx)
+setcursor 12, little
+printf "ax=%d, bx=%d, cx=%d, dx=%d", ax, bx, cx, dx
 '''
 
 

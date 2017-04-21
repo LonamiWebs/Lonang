@@ -35,6 +35,6 @@ def setcursor(c, m):
 
 
 setcursor_statement = Statement(
-    r'setcursor \( (INM) , (INM) \)',
+    r'setcursor  (INM) , (INM)',
     setcursor
 )

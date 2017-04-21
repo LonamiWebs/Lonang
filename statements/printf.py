@@ -153,9 +153,9 @@ def printf(c, m):
                'pop ax')
 
 printf_statement = Statement(
-    #          A string possibly formatted
-    r'printf \( ("[\s\S]+") (?:, (CSINM))? \)|printf \( (INM) \)',
-    #                                         Or a single var
+    #          A string    (formatted)?
+    r'printf  ("[\s\S]+") (?:, (CSINM))?|printf  (INM)',
+    #                                    Or a single inmediate value
 
     printf
 )
