@@ -17,6 +17,9 @@ string mystr = "Hello\r\nworld!"
 string person = "Lonami"
 string place = "here"
 
+byte[] vector1 = 'A', 'B', 'C'
+byte[] vector2 =  1 ,  2,   3
+
 const VALUE = 'L' ; L value!
 
 function myMethod(ax, bx) returns number {
@@ -35,6 +38,8 @@ function gcd(ax, bx) returns ax {
 ax = 6
 bx = 4
 ax, bx = bx, ax
+
+vector1[2], vector1[1], vector1[0] = vector2[0], vector2[1], vector2[2]
 
 ax += bx
 

@@ -27,7 +27,7 @@ class Operand:
             self.is_mem = True
             if '[' in self.name:
                 self.name, self.index = self.name.split('[')
-                self.index = index.split(']')[0].strip()
+                self.index = self.index.split(']')[0].strip()
                 # TODO Assert index is OK
 
             var = c.variables.get(self.name, None)

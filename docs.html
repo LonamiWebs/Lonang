@@ -217,7 +217,11 @@ vector[bx+di-10] = 10
     <p>The length of the vector cannot be changed on runtime, and can be
     queried on compile time by accessing <code>vector.length</code> which
     will be replaced with its actual length.</p>
-    <!-- TODO Make all this of vectors true! -->
+
+    <p><b>Note</b> that the index used to access the vector elements is
+    the <i>offset in bytes</i>, not the <i>n</i>'th element. One should
+    be careful with this.</p>
+    <!-- TODO This should probably be fixed -->
 
     <h2 id="comments">Comments</h2>
     <p>Inline comments can be specified after the statement, separated by
