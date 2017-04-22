@@ -22,6 +22,14 @@ class Operand:
             self.is_reg = True
             self.code = self.name
             self.size = 8 if self.name[-1] in 'hl' else 16
+            # Access to the low/high part if supported
+            if self.name[-1] in 'xhl':
+                self.full = self.name[0] + 'x'
+                self.high = self.name[0] + 'h'
+                self.low = self.name[0] + 'l'
+            else:
+                self.full = self.name
+                self.high = self.low = None
 
         else:
             self.is_mem = True

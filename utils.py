@@ -78,7 +78,7 @@ def helperassign(c, dst, src):
 
         elif dst.size < src.size:
             # The destination is smaller, we have to ignore the high part
-            if src.is_mem or src[-1] != 'x':
+            if src.is_mem or src.low is None:
                 # # # [Case large memory/register to small register]
                 # The source is memory, then the destination is a register
                 #
@@ -101,7 +101,7 @@ def helperassign(c, dst, src):
                 # We know that we have acces to the low part since it was
                 # checked above, otherwise we would have needed that
                 # auxiliary to be able to pick only the low part
-                helperassign(c, dst, f'{src[0]}l')
+                helperassign(c, dst, f'{src.low}')
 
         else:
             # The destination is larger, we need to mask the high part.
@@ -112,53 +112,53 @@ def helperassign(c, dst, src):
                 # # # [Case small memory to large register]
                 # Check if the register supports accessing to the r'[HL]'
                 # Otherwise we need to use a temporary register such as 'ax'
-                if dst[-1] == 'x':
-                    c.add_code(f'xor {dst[0]}h, {dst[0]}h')
-                    helperassign(c, f'{dst[0]}l', src)
-                else:
+                if dst.low is None:
                     c.add_code(f'push ax')
                     c.add_code(f'xor ah, ah')
                     helperassign(c, 'al', src)
                     helperassign(c, dst, 'ax')
                     c.add_code(f'pop ax')
+                else:
+                    c.add_code(f'xor {dst.high}, {dst.high}')
+                    helperassign(c, f'{dst.low}', src)
             elif dst.is_mem:
                 # # # [Case small register to large memory]
                 # All the 8 bit registers support accessing to 'X', so we
                 # can just mask away the high part, move it and restore
-                c.add_code(f'push {src[0]}x')
+                c.add_code(f'push {src.full}')
 
                 # We might need to move the high to the low part before masking
                 if src[-1] == 'h':
-                    helperassign(c, f'{src[0]}l', f'{src[0]}h')
-                c.add_code(f'xor {src[0]}h, {src[0]}h')
+                    helperassign(c, f'{src.low}', f'{src.high}')
+                c.add_code(f'xor {src.high}, {src.high}')
 
-                helperassign(c, dst, f'{src[0]}x')
-                c.add_code(f'pop {src[0]}x')
+                helperassign(c, dst, f'{src.full}')
+                c.add_code(f'pop {src.full}')
             else:
                 # # # [Case small register to large register]
                 if src[-1] == 'l':
                     # We're using the low part, we can directly copy
                     # and then mask the high part with AND or XOR
-                    helperassign(c, dst, f'{src[0]}x')
-                    if dst[-1] == 'x':
-                        c.add_code(f'xor {dst[0]}h, {dst[0]}h')
-                    else:
+                    helperassign(c, dst, f'{src.full}')
+                    if dst.high is None:
                         c.add_code(f'and {dst}, 0xff')
+                    else:
+                        c.add_code(f'xor {dst.high}, {dst.high}')
                 else:
                     # We want to assign the src = YH, but it's 8-bits
-                    if dst[-1] == 'x':
-                        # Destination supports 8-bits access so we can
-                        # directly move those and mask away the high part
-                        helperassign(c, f'{dst[0]}l', src)
-                        c.add_code(f'xor {dst[0]}h, {dst[0]}h')
-                    else:
+                    if dst.low is None:
                         # No support to move the 8-bits directly, we need
                         # to save the value, move it, mask it, and move it
-                        c.add_code(f'push {src[0]}x')
-                        helperassign(c, f'{src[0]}l', src)
+                        c.add_code(f'push {src.full}')
+                        helperassign(c, f'{src.low}', src)
                         c.add_code(f'xor {src}, {src}')
-                        helperassign(c, dst, f'{src[0]}x')
-                        c.add_code(f'pop {src[0]}x')
+                        helperassign(c, dst, f'{src.full}')
+                        c.add_code(f'pop {src.full}')
+                    else:
+                        # Destination supports 8-bits access so we can
+                        # directly move those and mask away the high part
+                        helperassign(c, f'{dst.low}', src)
+                        c.add_code(f'xor {dst.high}, {dst.high}')
 
         # Single assignment done, early exit
         return
