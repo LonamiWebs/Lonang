@@ -1,15 +1,18 @@
 from .statement import Statement
-from utils import parseint
+from utils import parseint, helperoperate
+from operands import Operand
 
 
 def sub(c, m):
     """Subtraction statement. For instance:
         ax -= bx
     """
-    if parseint(m.group(2)) == 1:
-        c.add_code(f'dec {m.group(1)}')
+    dst = Operand(c, m.group(1))
+    src = Operand(c, m.group(2))
+    if src.value == 1:
+        c.add_code(f'dec {dst}')
     else:
-        c.add_code(f'sub {m.group(1)}, {m.group(2)}')
+        helperoperate(c, 'sub', dst, src)
 
 
 sub_statement = Statement(
