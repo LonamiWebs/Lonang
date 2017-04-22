@@ -64,8 +64,10 @@ def divmod_(c, m):
         helperassign(c, 'ax', dividend)
 
         # Everything set, perform the division
-        c.add_code(f'xor dx, dx')  # Upper bits are considered!
-        c.add_code(f'div {used_divisor}')
+        c.add_code([
+            f'xor dx, dx',  # Upper bits are considered!
+            f'div {used_divisor}'
+        ])
 
         if push_divisor:
             # Division done, restore our temporary register
@@ -74,9 +76,11 @@ def divmod_(c, m):
         # Now move the result if required
         # Special case, 'ax' and 'dx are swapped
         if quotient == 'dx' and remainder == 'ax':
-            c.add_code('push ax',
-                       'mov ax, dx',
-                       'pop dx')
+            c.add_code([
+                'push ax',
+                'mov ax, dx',
+                'pop dx'
+            ])
         else:
             # Although helperassign would take care of these, we can
             # slightly optimize away the otherwise involved push/pop

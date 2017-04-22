@@ -48,10 +48,6 @@ def variable(c, m):
             value=values,
             vector_size=vector_size
         ))
-    # TODO Define usage of vectors!! And what the ? means!! Maybe
-    # it should just be omited to be:
-    # type[size] name
-    # Without =, ye probably........
 
 variable_statement = Statement(
     #   Type for the variable        vector   or' '      optional value

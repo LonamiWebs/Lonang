@@ -17,9 +17,11 @@ def putchar(c, m):
     if m.group(1) == 'digit':
         c.add_code("add al, '0'")
 
-    c.add_code('mov ah, 14')
-    c.add_code('int 10h')
-    c.add_code('pop ax')
+    c.add_code([
+        'mov ah, 14',
+        'int 10h',
+        'pop ax'
+    ])
 
 
 putchar_statement = Statement(

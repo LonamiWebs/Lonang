@@ -33,14 +33,14 @@ def else_(c, m):
     else:
         elselabel = iflabel + '_else'
 
-    c.add_code(
+    c.add_code([
         # After the if finished, it needs to skip the else end part
         f'jmp {elselabel}',
 
         # Add the if label back, if this condition was not met
         # on the if jump, then we need to jump here, to the else (if label)
         f'{iflabel}:'
-    )
+    ])
 
     # After the else brace closes, ending the met if should skip the else
     c.add_pending_code(f'{elselabel}:')

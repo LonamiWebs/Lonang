@@ -26,10 +26,6 @@ class Statement:
             return False
 
     @staticmethod
-    def assert_operands(c, left, right):
-        pass
-
-    @staticmethod
     def recompile(s):
         """Used to compile "readable" regexes, with the following changes:
             '^' and '$' will be prepended and appended, respectively

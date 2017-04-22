@@ -23,9 +23,12 @@ class Function:
     def mangle(name, param_count):
         return name + '_' * param_count
 
-    def add_code(self, *values):
+    def add_code(self, values):
         """Extends or appends the string value(s) for the code"""
-        self.code.extend(v for v in values if v is not None)
+        if isinstance(values, str):
+            self.code.append(values)
+        else:
+            self.code.extend(values)
 
 
 class FunctionEnd():

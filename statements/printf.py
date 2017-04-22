@@ -22,8 +22,10 @@ def define_and_print(c, string):
         c.add_variable(var)
 
     # Now we have an existing variable with the content we want to show
-    c.add_code(f'lea dx, {var.name}')
-    c.add_code(f'int 21h')
+    c.add_code([
+        f'lea dx, {var.name}',
+        f'int 21h'
+    ])
 
 
 def load_integer(c, op):
@@ -32,10 +34,11 @@ def load_integer(c, op):
     """
     itos = define_integer_to_string(c)
     helperassign(c, itos.params[0], op)
-    c.add_code(f'call {itos.name}')
-    # AX was lost, we need to set the right value again TODO Improve ITOS!!
-    c.add_code(f'mov ah, 9')
-    c.add_code(f'lea dx, {itos.returns}')
+    c.add_code([
+        f'call {itos.name}',
+        f'mov ah, 9',
+        f'lea dx, {itos.returns}'
+    ])
 
 
 def is_ax_or_dx_variant(op):
@@ -66,8 +69,10 @@ def printf(c, m):
     var = m.group(3)
 
     # Save the registers used for calling the print interruption
-    c.add_code('push ax',
-               'push dx')
+    c.add_code([
+        'push ax',
+        'push dx'
+    ])
 
     # string/args and var are mutually exclusive
     if var:
@@ -79,14 +84,18 @@ def printf(c, m):
             else:
                 load_integer(c, op.code)
 
-            c.add_code(f'mov ah, 9')
-            c.add_code(f'int 21h')
+            c.add_code([
+                f'mov ah, 9',
+                f'int 21h'
+            ])
 
         elif op.is_reg:
             # Using a register, which means we need to load an integer
             load_integer(c, op)
-            c.add_code(f'mov ah, 9')
-            c.add_code(f'int 21h')
+            c.add_code([
+                f'mov ah, 9',
+                f'int 21h'
+            ])
 
         else:
             # Assume inmediate integer value
@@ -147,8 +156,10 @@ def printf(c, m):
             define_and_print(c, string)
 
     # All done, restore the original dx/ax values
-    c.add_code('pop dx',
-               'pop ax')
+    c.add_code([
+        'pop dx',
+        'pop ax'
+    ])
 
 printf_statement = Statement(
     #          A string    (formatted)?

@@ -30,8 +30,10 @@ def setcursor(c, m):
         helperassign(c, 'dh', m.group(1))
         helperassign(c, 'dl', m.group(2))
 
-    c.add_code(f'call {setc.name}')
-    c.add_code(f'pop dx')
+    c.add_code([
+        f'call {setc.name}',
+        f'pop dx'
+    ])
 
 
 setcursor_statement = Statement(

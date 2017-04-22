@@ -9,10 +9,10 @@ def if_(c, m):
         }
     """
     label = c.get_uid(m.group(4))
-    c.add_code(
+    c.add_code([
         f'cmp {m.group(1)}, {m.group(3)}',
         f'{ctoi[m.group(2)]} {label}'
-    )
+    ])
     c.add_pending_code(f'{label}:')
 
 

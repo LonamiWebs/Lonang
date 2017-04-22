@@ -19,8 +19,10 @@ def repeat(c, m):
     # This won't optimize away the case where the value is 0
     count = parseint(m.group(1))
     if count is None or count <= 0:  # count unknown or zero
-        c.add_code(f'test {m.group(2)}, {m.group(2)}')
-        c.add_code(f'jz {labelend}')
+        c.add_code([
+            f'test {m.group(2)}, {m.group(2)}',
+            f'jz {labelend}'
+        ])
 
     # Add the start label so we can jump here
     c.add_code(f'{labelstart}:')

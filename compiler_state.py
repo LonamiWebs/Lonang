@@ -41,12 +41,15 @@ class CompilerState:
         self.uid += 1
         return result
 
-    def add_code(self, *values):
+    def add_code(self, values):
         """Extends the code with the given values"""
         if self.defining_function is None:
-            self.code.extend(v for v in values if v is not None)
+            if isinstance(values, str):
+                self.code.append(values)
+            else:
+                self.code.extend(values)
         else:
-            self.defining_function.add_code(*values)
+            self.defining_function.add_code(values)
 
     def add_pending_code(self, values):
         """Appends the given value(s) to the pending code,
@@ -125,9 +128,6 @@ class CompilerState:
             # Defining the function ended, so clear its state
             self.defining_function = None
         else:
-            if isinstance(popped, str):
-                self.add_code(popped)
-            else:
-                self.add_code(*popped)
+            self.add_code(popped)
 
         return True

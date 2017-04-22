@@ -19,10 +19,10 @@ def while_(c, m):
 
     if m.group(4) is None:
         # 'or once' is not present, we might not need to enter the loop
-        c.add_code(
+        c.add_code([
             f'cmp {m.group(1)}, {m.group(3)}',
             f'{ctoi[m.group(2)]} {labelend}'
-        )
+        ])
     c.add_code(f'{labelstart}:')
 
     # Reenter the loop if condition is met
