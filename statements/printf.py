@@ -1,5 +1,6 @@
 from .statement import Statement
 from variables import Variable
+from operands import Operand
 from utils import helperassign
 from builtin_functions import define_integer_to_string, define_tmp_variable
 import re
