@@ -330,6 +330,11 @@ if ax &lt; bx { @myFirstIf
 }
 </pre>
 
+    <p>Since the case where checking whether a number is even or odd, a
+    different form for the if is available, <code>if var is even</code> and
+    <code>if var is odd</code> will enter the if block if the specified
+    <b>var</b>iable is even or odd respectively.</p>
+
     <h3 id="repeat-loop"><code>repeat</code> loop</h3>
     <p>The <code>repeat</code> loop can be used to repeat a specific part of
     the code a <i>n</i> amount of times. Its syntax is defined as follows:</p>
@@ -398,13 +403,9 @@ while ax == 10 <b>or once</b> {
 ax = 7
 forever {
     printf "%d -> ", ax
-    dx = ax
-    dx &= 1
-    if dx == 0 {
-        ; Even
+    if ax is even {
         ax, dx = divmod ax, 2
     } else {
-        ; Odd
         dx = ax
         ax += dx
         ax += dx
