@@ -96,6 +96,7 @@
         <li><a href="#basic-io">Basic IO</a></li>
             <ul>
                 <li><a href="#printf"><code>printf</code> function</a></li>
+                <li><a href="#putchar"><code>putchar</code> function</a></li>
                 <li><a href="#setcursor"><code>setcursor</code> function</a></li>
             </ul>
         </li>
@@ -490,6 +491,16 @@ printf "\r\nExiting...\r\n"</pre>
     <p>If two subsequent calls were to be made to <code>printf</code>,
     it's recommended to use <code>printf("%s%s", str1, str2)</code> since
     furhter optimization will be made.</p>
+
+    <h3 id="putchar"><code>putchar</code> function</h3>
+    <p>Used to <b>put</b> a single <b>char</b>acter (or digit) to the screen,
+    advancing the cursor position.</p>
+
+    <p>Either a variable or an inmediate value can be passed to the function:</p>
+<pre>put char 'H'
+put char 'I'
+put char ' '
+put digit cx</pre>
 
     <h3 id="setcursor"><code>setcursor</code> function</h3>
     <p>This function allows to freely <b>set the cursor</b> on the screen.
