@@ -84,6 +84,7 @@
                 <li><a href="#if-else-statements"><code>if-else</code> statements</a></li>
                 <li><a href="#repeat-loop"><code>repeat</code> loop</a></li>
                 <li><a href="#while-loop"><code>while</code> loop</a></li>
+                <li><a href="#break-statement"><code>break</code> statement</a></li>
             </ul>
         </li>
         <li><a href="#functions">Functions</a></li>
@@ -386,6 +387,31 @@ while ax == 10 <b>or once</b> {
     <p>The first time the loop will enter thanks to the <code>or once</code>
     part. In the loop, <i>ax</i> will become 10. Then the loop will repeat
     because the condition is met, and exit once <i>ax</i> becomes 11.</p>
+
+    <h3 id="break-statement"><code>break</code> statement</h3>
+    <p>If one desires to <code>break</code> free from a block, it's possible
+    to do so with the <code>break</code> keyword, used to early terminate
+    a block:</p>
+<pre>while ax &lt; 10 {
+    ax += 1
+    <b>break</b>
+    ax -= 1  ; This line will never be executed
+}
+; Execution will continue here</pre>
+
+    <p>However, this is not very useful per se. For this reason, it's possible
+    to specify the amount of blocks one desires to break, by specifying the
+    number after the keyword:</p>
+<pre>
+<pre>while ax &lt; 10 {
+    ax += 1
+    if ax > 7 {
+        break 2  ; This will break two levels
+    }
+    ax -= 1
+}
+; Execution will continue here on break</pre>
+</pre>
 
     <h2 id="functions">Functions</h2>
     <p>Functions <b>must</b> be declared at the top of the file, since

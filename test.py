@@ -73,7 +73,16 @@ ax = gcd(211, 173)
 
 ax = 10
 bx = 3
-ax, dx = divmod ax, bx
+ax, cx = divmod ax, bx
+dx += 3
+
+while cx == cx {
+    ax += 2
+    dx -= 1
+    if dx == 0 {
+        break 2
+    }
+}
 
 printf "%s, hello %s! How come you've came to %s\r\n", place, person, place
 
