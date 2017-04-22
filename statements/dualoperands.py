@@ -3,6 +3,9 @@ from utils import parseint, helperoperate
 from operands import Operand
 
 translation = {
+    '|': 'or',
+    '^': 'xor',
+    '&': 'and',
     '+': 'add',
     '-': 'sub'
 }
@@ -14,8 +17,11 @@ translation1 = {
 
 def dualoperands(c, m):
     """Operations with two operands statement. For instance:
-        dx += cx  ; Addition
-        ax -= bx  ; Subtraction
+        ax |= bx  ; Bitwise OR
+        dx ^= cx  ; Bitwise XOR
+        ax &= bx  ; Bitwise AND
+        dx += cx  ; Integer addition
+        ax -= bx  ; Integer subtraction
     """
     op = m.group(2)
     dst = Operand(c, m.group(1))
@@ -28,6 +34,6 @@ def dualoperands(c, m):
 
 
 dualoperands_statement = Statement(
-    r'(VAR) ([+-])= (INM)',
+    r'(VAR) ([|^&+-])= (INM)',
     dualoperands
 )

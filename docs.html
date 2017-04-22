@@ -45,7 +45,17 @@
         border-right: 18px solid transparent;
         border-bottom: 24px solid #448;
     }
+    table {
+        border-collapse: collapse;
+    }
+    table, td, th {
+        border: 1px solid #ddd;
+    }
+    td {
+        padding: 4px 4px;
+    }
     </style>
+    <meta charset="utf-8" />
 </head>
 <body>
 <a id="goup" href="#index">
@@ -94,6 +104,51 @@
     <h2 id="general">General</h2>
     <p>Only <b>one</b> statement per line is allowed, since the statement
     separator used is the new line character.</p>
+
+    <p>Once you have one or more <i>variables</i> at your disposal, you can
+    perform basic operations such as:</p>
+<pre>
+; Add 'cx' to 'dx'
+dx += cx
+
+; Subtract 'bx' from 'ax'
+ax -= bx
+
+; Bitwise operations (they work on the bits level)
+ax |= bx  ; OR
+dx ^= cx  ; XOR
+ax &= bx  ; AND
+</pre>
+
+    <p>Internally, numbers are represented in base 2, for instance, <i>5</i> is
+    <i>101</i> (<i>= 1×2<sup>2</sup> + 0×2<sup>1</sup> + 1×2<sup>0</sup></i>).
+    The bitwise operations allow to work with them on this <i>1</i>'s and
+    <i>0</i>'s level. The following table represent what each bitwise operation
+    would do (first two are inputs, third one is output):</p>
+
+    <table><tr>
+        <td><table>
+            <tr><td colspan=3>OR</td></tr>
+            <tr><td>0</td><td>0</td><td><b>= 0</b></td></tr>
+            <tr><td>0</td><td>1</td><td><b>= 1</b></td></tr>
+            <tr><td>1</td><td>0</td><td><b>= 1</b></td></tr>
+            <tr><td>1</td><td>1</td><td><b>= 1</b></td></tr>
+        </table></td>
+        <td><table>
+            <tr><td colspan=3>XOR</td></tr>
+            <tr><td>0</td><td>0</td><td><b>= 0</b></td></tr>
+            <tr><td>0</td><td>1</td><td><b>= 1</b></td></tr>
+            <tr><td>1</td><td>0</td><td><b>= 1</b></td></tr>
+            <tr><td>1</td><td>1</td><td><b>= 0</b></td></tr>
+        </table></td>
+        <td><table>
+            <tr><td colspan=3>AND</td></tr>
+            <tr><td>0</td><td>0</td><td><b>= 0</b></td></tr>
+            <tr><td>0</td><td>1</td><td><b>= 0</b></td></tr>
+            <tr><td>1</td><td>0</td><td><b>= 0</b></td></tr>
+            <tr><td>1</td><td>1</td><td><b>= 1</b></td></tr>
+        </table></td>
+    </tr></table>
 
     <h2 id="variables">Variables</h2>
     <p>Variables can be defined anywhere in the code, although it is
