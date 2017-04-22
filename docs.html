@@ -388,6 +388,35 @@ while ax == 10 <b>or once</b> {
     part. In the loop, <i>ax</i> will become 10. Then the loop will repeat
     because the condition is met, and exit once <i>ax</i> becomes 11.</p>
 
+    <h3 id="forever-loop"><code>forever</code> loop</h3>
+    <p>This loop can be used when one desires to execute a block of code
+    indefinitely. The <code>forever</code> loop proves extremely useful with
+    the <code>break</code> keyword, since it allows arbitrarily complex
+    conditions to be met before the loop is exited:</p>
+<pre>
+; Collatz conjecture starting at 7
+ax = 7
+forever {
+    printf "%d -> ", ax
+    dx = ax
+    dx &= 1
+    if dx == 0 {
+        ; Even
+        ax, dx = divmod ax, 2
+    } else {
+        ; Odd
+        dx = ax
+        ax += dx
+        ax += dx
+        ax += 1
+    }
+    if ax == 1 {
+        break 2
+    }
+}
+printf 1
+</pre>
+
     <h3 id="break-statement"><code>break</code> statement</h3>
     <p>If one desires to <code>break</code> free from a block, it's possible
     to do so with the <code>break</code> keyword, used to early terminate

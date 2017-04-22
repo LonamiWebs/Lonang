@@ -76,7 +76,7 @@ bx = 3
 ax, cx = divmod ax, bx
 dx += 3
 
-while cx == cx {
+forever {
     ax += 2
     dx -= 1
     if dx == 0 {
