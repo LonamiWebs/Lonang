@@ -75,7 +75,11 @@ class Operand:
         value = value.strip()
         try:
             if value[0] == "'" and value[-1] == "'":
-                return ord(value[1])
+                value = value.strip("'").encode('ascii').decode('unicode_escape')
+                if len(value) != 1:
+                    raise ValueError('A character value can only be 1 character')
+
+                return ord(value[0])
 
             value = value.lower()
             if value.startswith('0x'):
