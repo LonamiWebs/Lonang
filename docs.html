@@ -98,6 +98,7 @@
             <ul>
                 <li><a href="#printf"><code>printf</code> function</a></li>
                 <li><a href="#putchar"><code>putchar</code> function</a></li>
+                <li><a href="#getchar"><code>getchar</code> function</a></li>
                 <li><a href="#setcursor"><code>setcursor</code> function</a></li>
             </ul>
         </li>
@@ -566,6 +567,16 @@ printf "\r\nExiting...\r\n"</pre>
 put char 'I'
 put char ' '
 put digit cx</pre>
+
+    <h3 id="getchar"><code>getchar</code> function</h3>
+    <p>Used to <b>get</b> a single <b>char</b>acter (or digit) from the
+    keyboard input. In addition, the input can both be echoed (by default)
+    or hidden by appending <code>show</code> or <code>hide</code>:</p>
+
+<pre>dl = get digit hide
+dh = get digit hide
+dl += dh
+printf dl</pre>
 
     <h3 id="setcursor"><code>setcursor</code> function</h3>
     <p>This function allows to freely <b>set the cursor</b> on the screen.

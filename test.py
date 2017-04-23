@@ -94,6 +94,13 @@ setcursor 12, little
 printf "ax=%d, bx=%d, cx=%d, dx=%d", ax, bx, cx, dx
 put char ' '
 put digit bx
+
+printf "\r\n  Enter two digits to add: "
+dl = get digit
+put char '+'
+dh = get digit
+dl += dh
+printf "= %d", dl
 '''
 
 
