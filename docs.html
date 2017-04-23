@@ -152,6 +152,15 @@ ax &= bx  ; AND
         </table></td>
     </tr></table>
 
+    <p><b>Multiplication</b> is slightly special, and may be more expensive in
+    certain cases. As a general rule of thumb, the destination should be either
+    <i>ax</i> or <i>al</i> and the second product either <i>dx</i> or <i>ah</i>.
+    The type of multiplication used, either 8 or 16 bits, will be determined by
+    the <b>largest</b> size of the operands, either the destination or the
+    source. For instance, <code>al *= 7</code> will use 8 bits mode since 7 can
+    be represented with 8 bits. But <code>al *= 260</code> will perform 16 bits
+    multiplication, and discard the bits that don't fit on <i>al</i>.</p>
+
     <h2 id="variables">Variables</h2>
     <p>Variables can be defined anywhere in the code, although it is
     recommended to define them at the <i>top</i> of the file. Currently
@@ -406,16 +415,14 @@ forever {
     if ax is even {
         ax, dx = divmod ax, 2
     } else {
-        dx = ax
-        ax += dx
-        ax += dx
+        ax *= 3
         ax += 1
     }
     if ax == 1 {
         break 2
     }
 }
-printf 1
+put digit 1
 </pre>
 
     <h3 id="break-statement"><code>break</code> statement</h3>
