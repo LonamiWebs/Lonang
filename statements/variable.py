@@ -1,6 +1,6 @@
 from .statement import Statement
 from variables import Variable
-from utils import get_csv
+from operands import Operand
 
 
 def variable(c, m):
@@ -30,7 +30,7 @@ def variable(c, m):
         ))
     else:
         # We have a vector, get the comma-separated values
-        values = get_csv(value)
+        values = Operand.get_csv(value)
 
         # Determine its size (remove '[]' by slicing) if given
         vector_size = vector_size[1:-1].strip()

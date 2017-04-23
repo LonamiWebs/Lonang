@@ -1,5 +1,6 @@
 from .statement import Statement
-from utils import helperassign, parseint
+from utils import helperassign
+from operands import Operand
 from builtin_functions import define_set_cursor
 
 
@@ -10,7 +11,7 @@ def setcursor(c, m):
     # TODO Possibly add support for inlining
     setc = define_set_cursor(c)
 
-    row, col = parseint(m.group(1)), parseint(m.group(2))
+    row, col = Operand.parseint(m.group(1)), Operand.parseint(m.group(2))
     
     # Assertion
     if row is not None and not 0 <= row < 256:

@@ -1,5 +1,6 @@
 from .statement import Statement
-from utils import helperassign, parseint
+from utils import helperassign
+from operands import Operand
 
 
 def divmod_(c, m):
@@ -10,8 +11,8 @@ def divmod_(c, m):
         ax = bx / 7  ; (integer division)
         dx = bx % 7  ; (bx modulo 7)
     """
-    a = parseint(m.group(3))
-    b = parseint(m.group(4))
+    a = Operand.parseint(m.group(3))
+    b = Operand.parseint(m.group(4))
     if a is not None and b is not None:
         # Both are integers, we can optimize this away
         # and just plug the right values in

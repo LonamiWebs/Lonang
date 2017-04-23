@@ -1,11 +1,11 @@
 import re
-from utils import get_csv
+from operands import Operand
 
 
 class Function:
     def __init__(self, name, params, returns=None, mangle=True):
         # Convert a comma separated list to normal parameters if required
-        self.params = get_csv(params)
+        self.params = Operand.get_csv(params)
 
         # Name mangling, add as many underscores as parameter count
         if mangle:

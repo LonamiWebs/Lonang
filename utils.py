@@ -1,4 +1,5 @@
 from operands import Operand
+from variables import TmpVariables
 
 
 # Compare To jump Instruction
@@ -79,7 +80,12 @@ def helperassign(c, dst, src):
         dst.pop(i)
         src.pop(i)
 
-    pushed = []
+    # The reason why we don't use push/pop and instead a temporary variable
+    # is because we cannot push/pop 8-bit values, and also because we can't
+    # use the helperassign() to pop a value with different sizes
+    tmps = TmpVariables(c)
+    saved = []
+
     for i in range(len(dst)):
         srcv = src[i]
         dstv = dst[i]
@@ -88,17 +94,16 @@ def helperassign(c, dst, src):
         for j in range(i+1, len(dst)):
             if dstv == src[j]:
                 found = True
-                pushed.append(src[j])
-                c.add_code(f'push {src[j]}')
+                saved.append(src[j])
+                tmps.save(src[j])
 
-        # If the parameter we've pushed matches the one being used,
-        # use the pushed one since it contains the right value
-        if pushed and pushed[-1] == srcv:
-            # Pop to assign the value to the function parameter
-            # TODO Pushed values should also store their size,
-            #      so we know whether we need another intermediate step
-            c.add_code(f'pop {dstv}')
-            pushed.pop()
+        # If the parameter we've saved matches the one being used,
+        # use the saved one since it contains the right value
+        if saved and saved[-1] == srcv:
+            # Restore the last saved temporary variable name
+            # to assign its value to the function parameter
+            helperassign(c, dstv, tmps[saved[-1]])
+            saved.pop()
         else:
             helperassign(c, dstv, srcv)
 
@@ -230,46 +235,3 @@ def helperoperate(c, op, dst, src):
                     # directly move those and mask away the high part
                     helperoperate(c, op, dst.low, src)
                     c.add_code(f'xor {dst.high}, {dst.high}')
-
-
-def parseint(value):
-    """Tries parsing an integer value, returns None on failure"""
-    if not value or not value.strip():
-        return None
-
-    value = value.strip()
-    try:
-        if value[0] == "'" and value[-1] == "'":
-            return ord(value[1])
-
-        if value.startswith('0x'):
-            return int(value[2:], base=16)
-
-        if value[0].isdigit() and value[-1] == 'h':
-            return int(value[:-1], base=16)
-
-        if value.startswith('0b'):
-            return int(value[2:], base=2)
-
-        if value[0].isdigit() and value[-1] == 'b':
-            return int(value[:-1], base=2)
-
-        return int(value)
-    except ValueError:
-        return None
-
-
-def get_csv(values):
-    """If 'values' is not a list already, converts the
-        comma separated values to a list of STRING values
-    """
-    if not values:
-        return []
-
-    if isinstance(values, list):
-        return values
-
-    if values.strip():
-        return [v.strip() for v in values.split(',')]
-    else:
-        return []

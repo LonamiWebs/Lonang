@@ -1,8 +1,8 @@
 from .statement import Statement
-from variables import Variable
+from variables import Variable, TmpVariables
 from operands import Operand
 from utils import helperassign
-from builtin_functions import define_integer_to_string, define_tmp_variable
+from builtin_functions import define_integer_to_string
 import re
 
 
@@ -111,9 +111,11 @@ def printf(c, m):
         # as we encountered one of the offending registers. Also, the stack
         # doesn't support the 8-bit versions of these registers, so we simply
         # use a temporary variable.
+        tmps = TmpVariables(c)
+
         for a in args:
             if is_ax_or_dx_variant(a):
-                helperassign(c, define_tmp_variable(c, a), a)
+                tmps.save(a)
 
         # After we saved the values we may later need, set up the print function
         c.add_code('mov ah, 9')
@@ -138,9 +140,9 @@ def printf(c, m):
                     if format_type == '%s':
                         c.add_code(f'lea dx, {op}')
                     elif format_type == '%d':
-                        if is_ax_or_dx_variant(op):
+                        if op in tmps:
                             # Special, this was saved previously
-                            load_integer(c, define_tmp_variable(c, op))
+                            load_integer(c, tmps[op])
                             c.add_code('mov ah, 9')
                         else:
                             load_integer(c, op)

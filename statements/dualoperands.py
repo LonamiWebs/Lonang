@@ -1,5 +1,5 @@
 from .statement import Statement
-from utils import parseint, helperoperate
+from utils import helperoperate
 from operands import Operand
 
 translation = {

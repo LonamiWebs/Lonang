@@ -1,5 +1,6 @@
 from .statement import Statement
-from utils import helperassign, parseint
+from utils import helperassign
+from operands import Operand
 
 
 def repeat(c, m):
@@ -17,7 +18,7 @@ def repeat(c, m):
 
     # Sanity check, if 0 don't enter the loop unless we know it's not 0
     # This won't optimize away the case where the value is 0
-    count = parseint(m.group(1))
+    count = Operand.parseint(m.group(1))
     if count is None or count <= 0:  # count unknown or zero
         c.add_code([
             f'test {m.group(2)}, {m.group(2)}',

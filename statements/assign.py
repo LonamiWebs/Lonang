@@ -1,5 +1,5 @@
 from .statement import Statement
-from utils import helperassign, get_csv
+from utils import helperassign
 
 
 def assign(c, m):

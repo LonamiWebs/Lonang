@@ -2,6 +2,7 @@
 from variables import Variable
 from functions import Function
 
+
 def define_integer_to_string(c):
     """Defines the 'integer_to_string' built-in function.
         AX is used to pass the input parameter, number to convert,
@@ -66,6 +67,7 @@ _f_itos_loop2:
 
     return function
 
+
 def define_set_cursor(c):
     """Defines the 'setcursor' built-in function.
         DH contains the row and DL contains the column.
@@ -90,18 +92,3 @@ def define_set_cursor(c):
     c.close_block()
 
     return function
-
-
-def define_tmp_variable(c, register):
-    """Defines a temporary variable for the given
-        register, to be used instead of the stack.
-
-        Returns the name of the temporary variable.
-    """
-    vname = f'_v_tmp_{register}'
-    if vname not in c.variables:
-        # TODO Use utils to determine the size instead?
-        size = 'byte' if register[-1] in 'hl' else 'short'
-        c.add_variable(Variable(vname, size, '?'))
-
-    return vname

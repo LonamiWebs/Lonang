@@ -1,4 +1,4 @@
-from utils import get_csv
+from operands import Operand
 
 
 class Variable:
@@ -11,7 +11,7 @@ class Variable:
             if vector_size < 1:
                 raise ValueError('Vector size must be ≥ 1')
 
-            self.value = get_csv(value)
+            self.value = Operand.get_csv(value)
             self.length = vector_size
             # One value is OK with any vector size, 'dup()' is assumed
             if len(self.value) != 1 and self.length != len(self.value):
@@ -95,3 +95,58 @@ class Variable:
 
     def __str__(self):
         return self.to_code()
+
+
+class TmpVariables:
+    def __init__(self, c):
+        self.c = c
+        self.saved = {}
+
+    def save(self, register):
+        """Defines a temporary variable for the given
+            register, to be used instead of the stack.
+
+            Returns the name of the temporary variable.
+        """
+        name = self.saved.get(register, None)
+        if name is None:
+            # First time defining it, add it to our saved dictionary
+            name = f'_v_tmp_{register}'
+            self.saved[register] = name
+
+            # First time defining it ever for this compiler state,
+            # add the newly declared variable to it
+            if name not in self.c.variables:
+                self.c.add_variable(Variable(
+                    name,
+                    'byte' if register[-1] in 'hl' else 'short',
+                    value='?'
+                ))
+
+        # No need for helperassign, we really know it's okay to move
+        self.c.add_code(f'mov {name}, {register}')
+
+    def restore(self, register):
+        """Restores the specified register from
+            its corresponding temporary variable"""
+        # No need for helperassign, we really know it's okay to move
+        self.c.add_code(f'mov {register}, {self[register]}')
+
+    def save_all(self, registers):
+        """Shorthand to save the list of registers"""
+        for r in registers:
+            self.save(r)
+
+    def restore_all(self):
+        """Shorthand to restore all registers"""
+        for r in self.saved:
+            self.restore(r)
+
+    def __contains__(self, register):
+        return register in self.saved
+
+    def __getitem__(self, register):
+        name = self.saved.get(register, None)
+        if name is None:
+            raise ValueError(f'"{register}" was not temporary saved')
+        return name

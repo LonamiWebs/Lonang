@@ -91,6 +91,49 @@ class Operand:
 
         return name in ('si', 'di', 'cs', 'ds', 'ss', 'sp', 'bp', 'es')
 
+    @staticmethod
+    def parseint(value):
+        """Tries parsing an integer value, returns None on failure"""
+        if not value or not value.strip():
+            return None
+
+        value = value.strip()
+        try:
+            if value[0] == "'" and value[-1] == "'":
+                return ord(value[1])
+
+            if value.startswith('0x'):
+                return int(value[2:], base=16)
+
+            if value[0].isdigit() and value[-1] == 'h':
+                return int(value[:-1], base=16)
+
+            if value.startswith('0b'):
+                return int(value[2:], base=2)
+
+            if value[0].isdigit() and value[-1] == 'b':
+                return int(value[:-1], base=2)
+
+            return int(value)
+        except ValueError:
+            return None
+
+    @staticmethod
+    def get_csv(values):
+        """If 'values' is not a list already, converts the
+            comma separated values to a list of STRING values
+        """
+        if not values:
+            return []
+
+        if isinstance(values, list):
+            return values
+
+        if values.strip():
+            return [v.strip() for v in values.split(',')]
+        else:
+            return []
+
     def __eq__(self, b):
         return self.code == b.code
 

@@ -1,7 +1,6 @@
 import re
 from functions import Function, FunctionEnd
 from operands import Operand
-from utils import get_csv
 
 
 class CompilerState:
@@ -89,7 +88,7 @@ class CompilerState:
         if isinstance(csv, Operand):
             return [csv]
 
-        return [Operand(self, v) for v in get_csv(csv)]
+        return [Operand(self, v) for v in Operand.get_csv(csv)]
 
     def find_matching_function(self, name, param_count, must_return):
         """Finds and returns the function definition which
