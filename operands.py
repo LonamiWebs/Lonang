@@ -5,7 +5,7 @@ class Operand:
     """
     def __init__(self, c, name, assert_vector_access=True):
         self.name = c.apply_constants(name).strip()
-        self.value = self.get_value(self.name)
+        self.value = self.parseint(self.name)
 
         # Default values
         self.index = None
@@ -20,6 +20,7 @@ class Operand:
 
         elif self.is_register(self.name):
             self.is_reg = True
+            self.name = self.name.lower()
             self.code = self.name
             self.size = 8 if self.name[-1] in 'hl' else 16
             # Access to the low/high part if supported
@@ -54,38 +55,12 @@ class Operand:
                 self.code = f'{self.name}[{self.index}]'
 
     @staticmethod
-    def get_value(value):
-        """Gets the integer value for 'value', or None on failure"""
-        if not value or not value.strip():
-            return None
-
-        value = value.strip()
-        try:
-            if value[0] == "'" and value[-1] == "'":
-                return ord(value[1])
-
-            if value.startswith('0x'):
-                return int(value[2:], base=16)
-
-            if value[0].isdigit() and value[-1] == 'h':
-                return int(value[:-1], base=16)
-
-            if value.startswith('0b'):
-                return int(value[2:], base=2)
-
-            if value[0].isdigit() and value[-1] == 'b':
-                return int(value[:-1], base=2)
-
-            return int(value)
-        except ValueError:
-            return None
-
-    @staticmethod
     def is_register(name):
         """Returns True if the given 'name' is a register"""
         if len(name) != 2:
             return False
 
+        name = name.lower()
         if name[0] in 'abcd' and name[1] in 'xhl':
             return True
 
@@ -102,6 +77,7 @@ class Operand:
             if value[0] == "'" and value[-1] == "'":
                 return ord(value[1])
 
+            value = value.lower()
             if value.startswith('0x'):
                 return int(value[2:], base=16)
 
