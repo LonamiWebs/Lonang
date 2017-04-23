@@ -42,7 +42,23 @@ def helperassign(c, dst, src):
         return
 
     # Multiple assignment
-    # We have a function, now copy the parameters if required
+    #
+    # First we check the case of length 2 (TODO: Could be generalized)
+    # in which we have the following situation:
+    #   v1, v2 = v3, v1
+    #
+    # We can swap the order not to lose the required v1 value:
+    #   v2, v1 = v1, v3
+    #
+    # However, there's nothing we can do if v3 were v2
+    if len(dst) == 2:
+        if dst[0] == src[1] and dst[1] != src[0]:
+            # The condition is met, swap the values
+            dst[0], dst[1] = dst[1], dst[0]
+            src[0], src[1] = src[1], src[0]
+
+
+    # Now that we have a certain amount of values, copy them as required
     #
     # If a source value is assigned to a destination value,
     # and this destination value appears later as as a source value,

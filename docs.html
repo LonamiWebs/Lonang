@@ -188,7 +188,8 @@ const VALUE = 0x7FFF
 ; Assignment
 ax, mybyte = 42, 13
 
-; Swapping values
+; Swapping values.
+; The order in which they get assigned is <b>not</b> guaranteed to be kept!
 ax, bx = bx, ax
 </pre>
 
