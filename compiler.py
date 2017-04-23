@@ -12,7 +12,10 @@ class Compiler:
         """Updates the compiler state with the given source"""
         # TODO No corrupt state will be told although it can happen
         in_comment = False
-        for i, line in enumerate(source.split('\n')):
+        if isinstance(source, str):
+            source = source.split('\n')
+
+        for i, line in enumerate(source):
             # Multiline comments
             if line == ';':
                 # Toggle

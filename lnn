@@ -1,0 +1,41 @@
+#!/usr/bin/python3.6
+
+from argparse import ArgumentParser
+from compiler import Compiler
+
+parser = ArgumentParser()
+
+
+parser.add_argument('file', nargs='*', help='input files to be compiled')
+
+parser.add_argument('-i', '--interactive', action='store_true',
+                   help='begins an interactive session which reads from stdin')
+
+parser.add_argument('-o', '--output', default='out.asm',
+                    help='place the output into <OUTPUT> file')
+
+args = parser.parse_args()
+
+compiler = Compiler()
+if args.interactive:
+    print('Reading until a line containing "EOF" only is found.')
+    while True:
+        line = input()
+        if line == 'EOF':
+            break
+        compiler.update_state(line)
+else:
+    if not args.file:
+        print('lnn: fatal error: no input files')
+        print('compilation terminated.')
+        quit()
+
+    for filename in args.file:
+        with open(filename) as f:
+            print(f'Updating compiler state with {filename}...')
+            compiler.update_state(f.read())
+
+
+with open(args.output, 'w') as f:
+    compiler.write(f)
+

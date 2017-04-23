@@ -1,10 +1,3 @@
-#!/usr/bin/python3.6
-
-from compiler import Compiler
-
-
-source = \
-r'''
 al = 2
 al *= 3
 put digit al
@@ -126,11 +119,3 @@ forever {
     }
 }
 put digit 1
-'''
-
-
-if __name__ == '__main__':
-    compiler = Compiler()
-    with open('result.asm', 'w') as f:
-        compiler.update_state(source)
-        compiler.write(f)
