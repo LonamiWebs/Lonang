@@ -33,6 +33,6 @@ def if_(c, m):
 
 
 if_statement = Statement(
-    r'if  (VAR)(?: ([<>=!]{2}) (INM)|  is  (even|odd)) {',
+    r'if  (VAR)(?: ([<>]|[<>!=]=) (INM)|  is  (even|odd)) {',
     if_
 )
