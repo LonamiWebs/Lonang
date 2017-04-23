@@ -101,6 +101,7 @@
                 <li><a href="#setcursor"><code>setcursor</code> function</a></li>
             </ul>
         </li>
+        <li><a href="#debugging">Debugging</a></li>
     </ul>
 
     <h2 id="general">General</h2>
@@ -575,6 +576,13 @@ printf "Middle"</pre>
     <p>Since the screen defaults to 80 columns and 25 rows, in this case,
     <code>12, 37</code> would be able to print <code>"Middle"</code> on
     the middle of the screen.</p>
+
+    <h2 id="debugging">Debugging</h2>
+    <p>If one desires to debug the generated code, one can use the
+    <code>tag</code> statement, which will add a comment along with a
+    <code>nop</code> instructions so that the execution can be ran until it.
+    A message must always be specified, for instance:</p>
+    <pre>tag Starting the part which needs debugging</pre>
 </div>
 </body>
 </html>

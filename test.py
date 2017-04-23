@@ -43,6 +43,8 @@ vector1[2], vector1[1], vector1[0] = vector2[0], vector2[1], vector2[2]
 
 ax += bx
 
+tag Starting conditionals
+
 if bx == 6 { @primerIf
     ax = VALUE
 
@@ -63,6 +65,8 @@ repeat 2 with cx { @primerLoop
 
     ax += 1
 }
+
+tag Method calls
 
 dx = myMethod(7, 3)
 
