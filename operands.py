@@ -1,3 +1,6 @@
+import re
+
+
 class Operand:
     """Anything that can be used as an operand
        such as a number, character, register or
@@ -5,7 +8,24 @@ class Operand:
     """
     def __init__(self, c, name, assert_vector_access=True):
         self.name = c.apply_constants(name).strip()
-        self.value = self.parseint(self.name)
+
+        # Check if we're accessing to a vectors length
+        m = re.search(r'\s*\.\s*length$', self.name)
+        is_inmediate_length = m is not None
+
+        if is_inmediate_length:
+            # We're accessing the length of a variable, ensure it's a vector
+            self.name = self.name[:m.start()]
+            var = self._get_variable_or_raise(c, self.name)
+            if not var.is_vector:
+                raise ValueError(f'Cannot access the length of the non-vector '
+                                 f'variable "{self.name}"')
+
+            self.value = var.length
+        else:
+            # Not accessing the length of a variable, might be an inmediate
+            # print('nay', self.name)
+            self.value = self.parseint(self.name)
 
         # Default values
         self.index = None
@@ -39,10 +59,7 @@ class Operand:
                 self.index = self.index.split(']')[0].strip()
                 # TODO Assert index is OK
 
-            var = c.variables.get(self.name, None)
-            if var is None:
-                raise ValueError(f'No variable called "{self.name}" found')
-
+            var = self._get_variable_or_raise(c, self.name)
             if assert_vector_access and var.is_vector and self.index is None:
                 raise ValueError(f'Vector variables must be indexed on access')
 
@@ -53,6 +70,14 @@ class Operand:
                 self.code = self.name
             else:
                 self.code = f'{self.name}[{self.index}]'
+
+    @staticmethod
+    def _get_variable_or_raise(c, name):
+        """Gets the variable with the specified name, or raises"""
+        var = c.variables.get(name, None)
+        if var is None:
+            raise ValueError(f'No variable called "{name}" found')
+        return var
 
     @staticmethod
     def is_register(name):

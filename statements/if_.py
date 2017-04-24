@@ -1,4 +1,5 @@
 from .statement import Statement
+from operands import Operand
 from utils import ctoi
 
 
@@ -12,20 +13,24 @@ def if_(c, m):
             ; code
         }
     """
+    a = Operand(c, m.group(1))
+    comparision = m.group(2)
+    b = Operand(c, m.group(3))
+
     even_odd = m.group(4)
     label = c.get_uid(m.group(5))
 
     if even_odd is None:
         c.add_code([
-            f'cmp {m.group(1)}, {m.group(3)}',
-            f'{ctoi[m.group(2)]} {label}'
+            f'cmp {a}, {b}',
+            f'{ctoi[comparision]} {label}'
         ])
     else:
         # If even, then bit is 0, then jump to skip if not zero
         # If  odd, then bit is 1, then jump to skip if zero
         jump = 'jnz' if even_odd == 'even' else 'jz'
         c.add_code([
-            f'test {m.group(1)}, 1',
+            f'test {a}, 1',
             f'{jump} {label}'
         ])
 

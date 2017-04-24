@@ -59,6 +59,17 @@ repeat 2 with cx { @primerLoop
     ax += 1
 }
 
+tag About to work with vector2.length
+
+printf "[ "
+bx = 0
+while bx < vector2.length {
+    vector2[bx] *= vector2[bx]
+    printf "%d ", vector2[bx]
+    bx += 1
+}
+printf "]"
+
 tag Method calls
 
 dx = myMethod(7, 3)
