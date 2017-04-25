@@ -24,9 +24,9 @@ def divide(c, m):
 
 
     if src.value is not None:
-        # Bit shift optimization: second product is a small multiple of 2
-        # http://zsmith.co/intel_m.html#mul or
-        # http://zsmith.co/intel_n.html#neg and http://zsmith.co/intel_s.html#sal
+        # Bit shift optimization: divisor is a small multiple of 2
+        # http://zsmith.co/intel_d.html#div or
+        # http://zsmith.co/intel_n.html#neg and http://zsmith.co/intel_s.html#sar
         if dst.is_reg or dst.size == 8:
             limit = 80
         else:
@@ -44,7 +44,7 @@ def divide(c, m):
             else:
                 cost = 20 + 4 * src.value
 
-        # Now we know our limit, beyond which multiplication is easier
+        # Now we know our limit, beyond which division is easier
         # and the cost per shift, so we know which values we can use
         if cost < limit:
             # The cost of negating and shifting is less, so we'll do that
