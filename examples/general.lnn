@@ -110,7 +110,9 @@ printf "= %d", dl
 bx = 3
 ax = 777
 while ax != 1 {
-    printf "; %d / 3 = ", ax
+    printf "# %d / 3 = ", ax
+    dx = ax
     ax /= 3
-    printf "%d", ax
+    dx %= 3
+    printf "(%d, %d)", ax, dx
 }
