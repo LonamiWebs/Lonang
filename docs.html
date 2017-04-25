@@ -164,6 +164,18 @@ ax &= bx  ; AND
     be represented with 8 bits. But <code>al *= 260</code> will perform 16 bits
     multiplication, and discard the bits that don't fit on <i>al</i>.</p>
 
+    <p>In the same way, both <b>division</b> <i>and</i> the modulo operator
+    are specal too. As a general rule of thumb, the destination should be either
+    <i>ax</i> or <i>al</i> for division, and <i>dx</i> or <i>ah</i> for modulo.s
+    The type of division used, either 8 or 16 bits, will be determined by
+    the <b>largest</b> size of the operands, either the destination or the
+    source. For instance, <code>al /= 3</code> will use 8 bits mode since 3 can
+    be represented with 8 bits. But <code>al /= 277</code> will perform 16 bits
+    division, and discard the bits that don't fit on <i>al</i>.</p>
+
+    <p>When possible, you should <b>always</b> use an register instead of an
+    inmediate value, specially important on loops.</p>
+
     <h2 id="variables">Variables</h2>
     <p>Variables can be defined anywhere in the code, although it is
     recommended to define them at the <i>top</i> of the file. Currently

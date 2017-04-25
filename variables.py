@@ -111,20 +111,27 @@ class TmpVariables:
         name = self.saved.get(register, None)
         if name is None:
             # First time defining it, add it to our saved dictionary
-            name = f'_v_tmp_{register}'
+            size = 8 if register[-1] in 'hl' else 16
+            name = self.create_tmp(register, size)
             self.saved[register] = name
-
-            # First time defining it ever for this compiler state,
-            # add the newly declared variable to it
-            if name not in self.c.variables:
-                self.c.add_variable(Variable(
-                    name,
-                    'byte' if register[-1] in 'hl' else 'short',
-                    value='?'
-                ))
 
         # No need for helperassign, we really know it's okay to move
         self.c.add_code(f'mov {name}, {register}')
+
+    def create_tmp(self, name, size):
+        """Creates a temporary variable with the given name,
+            and returns the name of the temporary variable"""
+        name = f'_v_tmp_{name}'
+        if name not in self.c.variables:
+            # First time defining it ever for this compiler state,
+            # add the newly declared variable to it
+            self.c.add_variable(Variable(
+                name,
+                'byte' if size == 8 else 'short',
+                value='?'
+            ))
+
+        return name
 
     def restore(self, register):
         """Restores the specified register from

@@ -65,6 +65,7 @@ printf "[ "
 bx = 0
 while bx < vector2.length {
     vector2[bx] *= vector2[bx]
+
     printf "%d ", vector2[bx]
     bx += 1
 }
@@ -105,3 +106,11 @@ put char '+'
 dh = get digit
 dl += dh
 printf "= %d", dl
+
+bx = 3
+ax = 777
+while ax != 1 {
+    printf "; %d / 3 = ", ax
+    ax /= 3
+    printf "%d", ax
+}
