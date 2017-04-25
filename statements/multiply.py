@@ -124,11 +124,6 @@ def multiply(c, m):
         # Move the result, 'ax', to wherever it should be
         helperassign(c, dst, 'ax')
 
-        # Clear dx unless saved or that's the destination, in which
-        # case xor'ing would be useless since overrode on restore
-        if dst.code != 'dx' and 'dx' not in saves:
-            c.add_code('xor dx, dx')
-
         # Restore the used registers
         tmps.restore_all()
 
