@@ -121,7 +121,7 @@ def parse_memory_addr(m, addr):
     first = addr.find('[')
     base, addr = addr[:first], addr[first:]
     if base:
-        accum = m[base]
+        accum = m.get_memory_addr(base)
     else:
         accum = 0
 
