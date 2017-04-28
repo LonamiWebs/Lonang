@@ -1,33 +1,27 @@
 from .instruction import paramcount
 from parser import parseint
-from termutils import putch, getch, get_colorama_color
-
-
-try:
-    import colorama
-    colorama.init()
-except ImportError:
-    colorama = None
+from datetime import datetime
 
 
 def int_21h(m):
     ah = m['ah']
     if ah == 0x01:
         # Read character with output
-        m['al'] = ord(getch(echo=True))
+        m['al'] = ord(m.screen.getch(echo=True))
         return True
 
     if ah == 0x08:
         # Read character without output
-        m['al'] = ord(getch(echo=False))
+        m['al'] = ord(m.screen.getch(echo=False))
         return True
 
     if ah == 0x09:
         # Write string
         i = m['dx']
         while chr(m.memory[i]) != '$':
-            putch(m.memory[i])
+            m.screen.write(m.memory[i])
             i += 1
+        m.screen.render()
         return True
 
     if ah == 0x4c:
@@ -43,36 +37,28 @@ def int_10h(m):
     ah = m['ah']
     if ah == 0x0e:
         # Teletype output
-        putch(m['al'])
+        m.screen.write(m['al'])
+        m.screen.render()
         return True
     if ah == 0x02:
         # Move cursor
-        if colorama is None:
-            print('err: pip colorama is required for INT 10h / AH = 02h')
-            quit()
-
-        pos = lambda y, x: '\x1b[%d;%dH' % (y, x)
-        row, col = m['dh'], m['dl']
-        print(pos(row, col))
+        m.screen.setcur(m['dh'], m['dl'])
         return True
     if ah == 0x06:
         # Clear terminal
-        clear()
+        m.screen.clear()
+        m.screen.render()
         return True
     if ah == 0x09:
         # Print character with attribute
         # TODO BH (pager number) is ignored
-        if colorama is None:
-            print('err: pip colorama is required for INT 10h / AH = 09h')
-            quit()
-
         al = m['al']  # character
         bl = m['bl']  # attribute
         cx = m['cx']  # number of times
-        print(get_colorama_color(bl))
-        for _ in range(cx):
-            putch(al)
-        print(colorama.Style.RESET_ALL)
+
+        al = chr(al) * cx
+        m.screen.write(al, color=bl)
+        m.screen.render()
         return True
 
     return False

@@ -1,5 +1,6 @@
 from parser import parseint, parse_memory_addr
 from parser import pack_value, unpack_value
+from screen_buffer import ScreenBuffer
 
 
 class Machine:
@@ -25,6 +26,9 @@ class Machine:
 
         # Machine labels used on jumps TODO Doesn't sound like a good idea
         self.labels = {}
+
+        # Machine's screen buffer output
+        self.screen = ScreenBuffer()
 
 
     def _isregister(self, name):
