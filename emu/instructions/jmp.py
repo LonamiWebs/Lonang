@@ -5,4 +5,4 @@ from .instruction import paramcount
 def jmp(m, params):
     """JMP label"""
     label = params[0]
-    registers['ip'] = labels[label]
+    m['ip'] = m.labels[label]

@@ -6,16 +6,12 @@ def div(m, params):
     """DIV src"""
     # TODO Set flags
     src = params[0]
-    size = access_size(src)
+    size = m.sizeof(src)
     if size == 8:
-        al, ah = divmod(access_get('ax'), access_get(src))
-        access_set('al', al)
-        access_set('ah', ah)
+        m['al'], m['ah'] = divmod(m['ax'], m[src])
     elif size == 16:
-        dxax = (access_get('dx') << 16) | access_get('ax')
-        ax, dx = divmod(dxax, access_get(src))
-        access_set('ax', ax)
-        access_set('dx', dx)
+        dxax = (m['dx'] << 16) | m['ax']
+        m['ax'], m['dx'] = divmod(dxax, m[src])
     else:
         print(f'err: invalid operand size on div')
         quit()

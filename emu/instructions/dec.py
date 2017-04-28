@@ -5,4 +5,5 @@ from .instruction import paramcount
 def dec(m, params):
     """DEC dst"""
     dst = params[0]
-    access_set(dst, alu_operate(dst, None, lambda d, s: d - 1))
+    m[dst] -= 1
+    m.update_flags(m[dst], size=m.sizeof(dst))

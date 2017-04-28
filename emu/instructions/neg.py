@@ -7,5 +7,10 @@ def neg(m, params):
     # TODO Perhaps instead these non-sense 'aluoperate' I should have
     #      an "update flags" method instead
     dst = params[0]
+    value = m[dst]
     size = access_size(dst)
-    access_set(dst, alu_operate(dst, None, lambda d, s: twocomp(d, size)))
+
+    power = 2**size
+    m[dst] = ((value ^ (power - 1)) + 1) & power - 1
+
+    m.update_flags(m[dst], size=m.sizeof(dst))

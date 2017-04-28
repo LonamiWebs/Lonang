@@ -1,39 +1,50 @@
 from .instruction import paramcount
+from parser import parseint
+from termutils import putch, getch, get_colorama_color
 
 
-def int_21h(params):
+try:
+    import colorama
+    colorama.init()
+except ImportError:
+    colorama = None
+
+
+def int_21h(m):
+    ah = m['ah']
     if ah == 0x01:
         # Read character with output
-        access_set('al', ord(getch(echo=True)))
-        return
+        m['al'] = ord(getch(echo=True))
+        return True
 
     if ah == 0x08:
         # Read character without output
-        print()
-        access_set('al', ord(getch(echo=False)))
-        return
+        m['al'] = ord(getch(echo=False))
+        return True
 
     if ah == 0x09:
         # Write string
-        i = access_get('dx')
-        while chr(memory[i]) != '$':
-            putch(memory[i])
+        i = m['dx']
+        while chr(m.memory[i]) != '$':
+            putch(m.memory[i])
             i += 1
-        return
+        return True
 
     if ah == 0x4c:
         # Machine halt
         print('success: machine halted')
         quit()
-        return
+        return True
+
+    return False
 
 
-def int_10h(params):
+def int_10h(m):
+    ah = m['ah']
     if ah == 0x0e:
         # Teletype output
-        al = access_get('al')
-        putch(al)
-        return
+        putch(m['al'])
+        return True
     if ah == 0x02:
         # Move cursor
         if colorama is None:
@@ -41,13 +52,13 @@ def int_10h(params):
             quit()
 
         pos = lambda y, x: '\x1b[%d;%dH' % (y, x)
-        row, col = access_get('dh'), access_get('dl')
+        row, col = m['dh'], m['dl']
         print(pos(row, col))
-        return
+        return True
     if ah == 0x06:
         # Clear terminal
         clear()
-        return
+        return True
     if ah == 0x09:
         # Print character with attribute
         # TODO BH (pager number) is ignored
@@ -55,42 +66,44 @@ def int_10h(params):
             print('err: pip colorama is required for INT 10h / AH = 09h')
             quit()
 
-        al = access_get('al')  # character
-        bl = access_get('bl')  # attribute
-        cx = access_get('cx')  # number of times
+        al = m['al']  # character
+        bl = m['bl']  # attribute
+        cx = m['cx']  # number of times
         print(get_colorama_color(bl))
         for _ in range(cx):
             putch(al)
         print(colorama.Style.RESET_ALL)
-        return
+        return True
+
+    return False
 
 
-def int_1ah(params):
+def int_1ah(m):
+    ah = m['ah']
     if ah == 0x00:
         # Ticks since midnight, around 18.20648 clock ticks per second
         now = datetime.now()
         oclock = datetime(now.year, now.month, now.day)
         ticks = (now - oclock).seconds
-        access_set('dx', ticks & 0xffff)
+        m['dx'] = ticks & 0xffff
         ticks >>= 16
-        access_set('cx', ticks & 0xffff)
-        access_set('al', 0)
-        return
+        m['cx'] = ticks & 0xffff
+        m['al'] = 0
+        return True
+
+    return False
 
 
 @paramcount(1)
 def int_(m, params):
     """INT code"""
     code = parseint(params[0])
-    ah = access_get('ah')
-    if code == 0x21:
-        int_21h(params)
-    if code == 0x10:
-        int_10h(params)
-    if code == 0x1a:
-        int_1ah(params)
+    if code == 0x21 and int_21h(m):
+        return
+    if code == 0x10 and int_10h(m):
+        return
+    if code == 0x1a and int_1ah(m):
+        return
 
     print(f'err: interrupt {hex(code)} not implemented')
-    print(registers['ip'])
-    print('\n'.join(lines[registers['ip']-2:registers['ip']+2]))
     quit()

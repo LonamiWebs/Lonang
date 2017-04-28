@@ -5,4 +5,4 @@ from .instruction import paramcount
 def pop(m, params):
     """POP dst"""
     dst = params[0]
-    access_set(dst, stack.pop())
+    m[dst] = m.pop()

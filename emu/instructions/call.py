@@ -5,5 +5,5 @@ from .instruction import paramcount
 def call(m, params):
     """CALL label"""
     label = params[0]
-    stack.append(registers['ip'])
-    registers['ip'] = labels[label]
+    m.push(m['ip'])
+    m['ip'] = m.labels[label]

@@ -4,6 +4,7 @@ from .instruction import paramcount
 @paramcount(2)
 def shl(m, params):
     """SHL dst, src"""
-    # TODO Set flags, and only cx or inmediate should be valid
+    # TODO Only cx or inmediate should be valid
     dst, src = params
-    access_set(dst, access_get(dst) << access_get(src))
+    m[dst] <<= m[src]
+    m.update_flags(m[dst], size=m.sizeof(dst))

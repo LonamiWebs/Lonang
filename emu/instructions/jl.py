@@ -4,6 +4,6 @@ from .instruction import paramcount
 @paramcount(1)
 def jl(m, params):
     """JL label"""
-    if flags['sf'] != flags['of']:
+    if m['sf'] != m['of']:
         label = params[0]
-        registers['ip'] = labels[label]
+        m['ip'] = m.labels[label]

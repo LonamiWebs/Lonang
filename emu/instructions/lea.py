@@ -5,5 +5,4 @@ from .instruction import paramcount
 def lea(m, params):
     """LEA dst, src"""
     dst, src = params
-    idx, _ = memory_nameloc[src]
-    access_set(dst, idx)
+    m[dst] = m.get_memory_addr(src)

@@ -5,4 +5,5 @@ from .instruction import paramcount
 def xor(m, params):
     """XOR dst, src"""
     dst, src = params
-    access_set(dst, alu_operate(dst, src, lambda d, s: d ^ s))
+    m[dst] ^= m[src]
+    m.update_flags(m[dst], size=m.sizeof(dst))

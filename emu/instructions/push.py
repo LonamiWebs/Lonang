@@ -5,4 +5,4 @@ from .instruction import paramcount
 def push(m, params):
     """PUSH src"""
     src = params[0]
-    stack.append(access_get(src))
+    m.push(m[src])

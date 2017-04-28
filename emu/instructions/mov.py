@@ -5,4 +5,4 @@ from .instruction import paramcount
 def mov(m, params):
     """MOV dst, src"""
     dst, src = params
-    access_set(dst, access_get(src))
+    m[dst] = m[src]
