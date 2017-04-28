@@ -174,7 +174,9 @@ ax &= bx  ; AND
     division, and discard the bits that don't fit on <i>al</i>.</p>
 
     <p>When possible, you should <b>always</b> use an register instead of an
-    inmediate value, specially important on loops.</p>
+    inmediate value, specially important on loops, <i>unless</i> using a
+    <b>power of two</b>. In this case, an inmediate value is better, and
+    even preferred.</p>
 
     <h2 id="variables">Variables</h2>
     <p>Variables can be defined anywhere in the code, although it is
@@ -602,18 +604,18 @@ printf "Middle"</pre>
     <code>12, 37</code> would be able to print <code>"Middle"</code> on
     the middle of the screen.</p>
 
+    <h2 id="compiling">Compiling</h2>
+    <p>To compile <code>.lnn</code> files (containing the source code of your
+    program in Lonang), simply use the <code>./lnn</code> tool. As a basic
+    example, to compile the code in <code>main.lnn</code>:</p>
+    <pre>./lnn main.lnn</pre>
+
     <h2 id="debugging">Debugging</h2>
     <p>If one desires to debug the generated code, one can use the
     <code>tag</code> statement, which will add a comment along with a
     <code>nop</code> instructions so that the execution can be ran until it.
     A message must always be specified, for instance:</p>
     <pre>tag Starting the part which needs debugging</pre>
-
-    <h2 id="compiling">Compiling</h2>
-    <p>To compile <code>.lnn</code> files (containing the source code of your
-    program in Lonang), simply use the <code>./lnn</code> tool. As a basic
-    example, to compile the code in <code>main.lnn</code>:</p>
-    <pre>./lnn main.lnn</pre>
 </div>
 </body>
 </html>
