@@ -24,14 +24,6 @@ size_structpack = {
 }
 
 
-def clear():
-    """Clears the screen"""
-    rows, cols = shutil.get_terminal_size((80, 25))
-    string = ' ' * cols
-    for _ in range(rows):
-        print(string)
-
-
 def getstart(line, swith):
     """If 'line' starts with 'swith', returns
        'line' with the starting part stripped
@@ -212,7 +204,7 @@ if start not in machine.labels:
 
 
 # We have a valid label, so we can start executing code
-clear()
+machine.screen.clear()
 machine['ip'] = machine.labels[start]
 while True:
     line = lines[machine['ip']]

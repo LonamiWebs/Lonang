@@ -1,3 +1,4 @@
+import os
 import sys
 import shutil
 
@@ -10,9 +11,14 @@ except ImportError:
 
 
 class ScreenBuffer:
-    def clear(self):
-        rows = shutil.get_terminal_size((80, 24))
-        # TODO Clear terminal...
+    if os.name == 'nt':
+        @staticmethod
+        def clear():
+            os.system('cls')
+    else:
+        @staticmethod
+        def clear():
+            os.system('clear')
 
     def write(self, text, color=None):
         if color is not None:
@@ -91,10 +97,10 @@ class ScreenBuffer:
         fg_light = (fg & 8) != 0
         bg = 40 + translation[bg & 7]
         fg = 30 + translation[fg & 7]
-        
+
         if bg_light:
             bg += 60
         if fg_light:
             fg += 60
-        
+
         return f'\033[{bg}m\033[{fg}m'
