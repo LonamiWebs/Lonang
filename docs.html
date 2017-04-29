@@ -518,6 +518,11 @@ dx = multiply(bx, ax)
     (assuming that the right registers contain the right values, which
     may not always be the case).</p>
 
+    <p>It's possible to pass a vector variable <i>by reference</i>,
+    by prepending <code>&</code> to the variable name. This also works
+    on assignments and any other kind of operations, since its address
+    is known at compile time.</p>
+
     <h2 id="builtin-functions">Built-in functions</h2>
     <p>Built-in functions are called in a similar to how user-defined functions
     are, although they do <b>not</b> use parenthesis to separate the argument

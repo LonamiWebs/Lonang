@@ -119,3 +119,17 @@ while ax != 1 {
 
 ax = &person
 printf "\r\naddress of person = %d\r\n", ax
+
+function printSkip(bx, cx) {
+    while cx != 0 {
+        si = 0
+        while si < cx {
+            put char bx[si]
+            si += 1
+        }
+        printf "\r\n"
+        cx -= 1
+    }
+}
+
+printSkip(&person, 6)

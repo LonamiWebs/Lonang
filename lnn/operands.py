@@ -61,19 +61,34 @@ class Operand:
             if '[' in self.name:
                 self.name, self.index = self.name.split('[')
                 self.index = self.index.split(']')[0].strip()
-                # TODO Assert index is OK
+                ok = self.parseint(self.index) is not None or \
+                     self.index in ['bx', 'si', 'di']
 
-            var = self._get_variable_or_raise(c, self.name)
-            if assert_vector_access and var.is_vector and self.index is None:
-                raise ValueError(f'Vector variables must be indexed on access')
+                if not ok:
+                    raise ValueError('Only immediate, BX, SI or DI can be used as indices')
 
-            self.size = var.size
-            self.type = var.type
-            self.is_vector = var.is_vector
-            if self.index is None:
-                self.code = self.name
+            if self.index is not None and self.is_register(self.name):
+                # A register may be okay for accessing the memory
+                if self.name not in ['bx', 'si', 'di']:
+                    raise ValueError('Only BX, SI and DI can be used to access memory')
+
+                self.size = 8
+                self.type = 'byte'
+                self.is_vector = False  # TODO but memory[i] can be?
+                self.code = f'[{self.name}][{self.index}]'
             else:
-                self.code = f'{self.name}[{self.index}]'
+                # We have a variable name
+                var = self._get_variable_or_raise(c, self.name)
+                if assert_vector_access and var.is_vector and self.index is None:
+                    raise ValueError(f'Vector variables must be indexed on access')
+
+                self.size = var.size
+                self.type = var.type
+                self.is_vector = var.is_vector
+                if self.index is None:
+                    self.code = self.name
+                else:
+                    self.code = f'{self.name}[{self.index}]'
 
     @staticmethod
     def _get_variable_or_raise(c, name):
