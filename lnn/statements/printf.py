@@ -15,7 +15,7 @@ def define_and_print(c, string):
 
     # First try finding an existing string variable with the same content
     # that we wish, if it exists, don't waste memory creating yet another one
-    enc = Variable.escape_string(string)
+    enc, _ = Variable.escape_string(string)
     var = next((v for v in c.variables.values() if v.value == enc), None)
     if not var:
         # No luck, create a new variable TODO This will escape the string again!

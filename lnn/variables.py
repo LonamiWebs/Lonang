@@ -5,6 +5,10 @@ class Variable:
     def __init__(self, name, vartype, value, vector_size=None):
         self.name = name
 
+        # Variable offset in memory, set by the compiler state
+        self.offset = None
+        self.length = 1
+
         # 'vector_size' should be None for non-vector types
         self.is_vector = vector_size is not None
         if self.is_vector:
@@ -47,7 +51,7 @@ class Variable:
 
                 self.typecode = 'DB'
                 self.size = 8
-                self.value = self.escape_string(value)
+                self.value, self.length = self.escape_string(value)
 
             else:
                 raise ValueError(f'Unknown variable type "{vartype}"')
@@ -55,32 +59,33 @@ class Variable:
     @staticmethod
     def escape_string(string):
         """Escapes the given string so it's valid to be assigned to a
-            string variable"""
+            string variable, and returns (escaped, length)"""
         # TODO Ensure it's a valid string, and that it's not already formatted
         analyzed = string.strip('"').encode('ascii').decode('unicode_escape')
+        length = len(analyzed)
         quote_open = False
-        result = ''
+        result = []
 
         for a in analyzed:
             if ord(a) < 32:
                 # Non-printable
                 if quote_open:
-                    result += '", '
+                    result.append('", ')
                     quote_open = False
-                result += str(ord(a))
-                result += ', '
+                result.append(str(ord(a)))
+                result.append(', ')
             else:
                 # Printable
                 if not quote_open:
-                    result += '"'
+                    result.append('"')
                     quote_open = True
-                result += a
+                result.append(a)
 
         if quote_open:
-            result += '", '
+            result.append('", ')
 
-        result += "'$'"
-        return result
+        result.append("'$'")
+        return ''.join(result), length + 1
 
     def to_code(self):
         """Returns the code representation for

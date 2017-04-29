@@ -49,7 +49,10 @@ class Compiler:
     def write(self, f):
         """Writes the current state to the given 'output' stream"""
         f.write('data segment\n')
-        for v in self.state.variables.values():
+        variables = sorted(
+            self.state.variables.values(), key=lambda var: var.offset)
+
+        for v in variables:
             f.write('    ')
             f.write(v.to_code())
             f.write('\n')

@@ -61,6 +61,9 @@ class CompilerState:
         if variable.is_constant:
             self.add_constant(variable.name, variable.value)
         else:
+            variable.offset = sum(v.length * (v.size // 8)
+                                  for v in self.variables.values())
+
             self.variables[variable.name] = variable
 
     def add_constant(self, name, replacement):
