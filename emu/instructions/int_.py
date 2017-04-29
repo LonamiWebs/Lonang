@@ -10,7 +10,7 @@ def int_21h(m):
         m['al'] = ord(m.screen.getch(echo=True))
         return True
 
-    if ah == 0x08:
+    if ah in [0x07, 0x08]:
         # Read character without output
         m['al'] = ord(m.screen.getch(echo=False))
         return True
@@ -91,5 +91,5 @@ def int_(m, params):
     if code == 0x1a and int_1ah(m):
         return
 
-    print(f'err: interrupt {hex(code)} not implemented')
+    print(f'err: INT {hex(code)} / AH = {hex(m["ah"])} not implemented')
     quit()
