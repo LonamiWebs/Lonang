@@ -13,7 +13,7 @@ def stripcomments(line):
         if c == "'" and not in_string:
             in_char = not in_char
 
-        if c == '"' and not in_char:
+        elif c == '"' and not in_char:
             in_string = not in_string
 
         elif c == ';' and not in_char and not in_string:
@@ -22,6 +22,42 @@ def stripcomments(line):
         result.append(c)
 
     return ''.join(result).strip()
+
+
+def splitvalues(line):
+    """Splits the comma separated values on 'line'
+       with support for strings"""
+    if ',' not in line:
+        return [line.strip()]
+
+    result = []
+    current = []
+    in_char = False
+    in_string = False
+    for c in line:
+        if c == "'" and not in_string:
+            in_char = not in_char
+
+        elif c == '"' and not in_char:
+            in_string = not in_string
+
+        elif c == ',' and not in_char and not in_string:
+            # We found a comma and we're not parsing a string or character
+            # So append the currently parsed string, if any, and clear it
+            current = ''.join(current).strip()
+            if current:
+                result.append(current)
+            current = []
+            # Don't add this ',' character to the current string afterwards
+            continue
+
+        current.append(c)
+
+    current = ''.join(current).strip()
+    if current:
+        result.append(current)
+
+    return result
 
 
 def pack_value(v, size):
@@ -93,9 +129,8 @@ def parsevalues(value, size):
 
        'size' must be either 8 or 16
     """
-    # TODO Allow binary values to be specified, do some parseint
     result = []
-    values = [stripcomments(v) for v in value.split(',') if stripcomments(v)]
+    values = splitvalues(stripcomments(value))
     for v in values:
         if 'dup(' in v.lower() and v[-1] == ')':
             count, dup = v.split()
