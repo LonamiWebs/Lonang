@@ -46,7 +46,7 @@ class Statement:
 
         s = s.replace('CSINM', r'(?:INM)(?: , (?:INM))*')
         s = s.replace('CSVAR', r'(?:VAR)(?: , (?:VAR))*')
-        s = s.replace('INM', r"(?:VAR(?: \. length)?|-?(?:0[xbXB])?[\da-f]+[hbHB]?|'\\?.')")
+        s = s.replace('INM', r"(?:&?VAR(?: \. length)?|-?(?:0[xbXB])?[\da-f]+[hbHB]?|'\\?.')")
         s = s.replace('VAR', r'[^_\W\d](?:\w)*(?: \[ [\dsdibx+\-\s]+ \])?')
         s = s.replace('  ', r'\s+')
         s = s.replace(' ', r'\s*')

@@ -22,9 +22,13 @@ class Operand:
                                  f'variable "{self.name}"')
 
             self.value = var.length
+        elif name.startswith('&'):
+            # We're accessing the offset of a variable in memory
+            var = self._get_variable_or_raise(c, name[1:].strip())
+            self.value = var.offset
         else:
-            # Not accessing the length of a variable, might be an inmediate
-            # print('nay', self.name)
+            # Not accessing the length of a variable or its offset,
+            # might be an immediate
             self.value = self.parseint(self.name)
 
         # Default values
