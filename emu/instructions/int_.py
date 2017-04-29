@@ -70,7 +70,7 @@ def int_1ah(m):
         # Ticks since midnight, around 18.20648 clock ticks per second
         now = datetime.now()
         oclock = datetime(now.year, now.month, now.day)
-        ticks = (now - oclock).seconds
+        ticks = int((now - oclock).total_seconds() * 18.20648)
         m['dx'] = ticks & 0xffff
         ticks >>= 16
         m['cx'] = ticks & 0xffff
