@@ -121,6 +121,7 @@ ax = &person
 printf "\r\naddress of person = %d\r\n", ax
 
 function printSkip(bx, cx) {
+    cx -= 1
     while cx != 0 {
         si = 0
         while si < cx {
@@ -132,4 +133,5 @@ function printSkip(bx, cx) {
     }
 }
 
-printSkip(&person, 6)
+printSkip(&person, person.length)
+printSkip(&place, place.length)

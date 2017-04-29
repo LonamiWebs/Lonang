@@ -17,10 +17,6 @@ class Operand:
             # We're accessing the length of a variable, ensure it's a vector
             self.name = self.name[:m.start()]
             var = self._get_variable_or_raise(c, self.name)
-            if not var.is_vector:
-                raise ValueError(f'Cannot access the length of the non-vector '
-                                 f'variable "{self.name}"')
-
             self.value = var.length
         elif name.startswith('&'):
             # We're accessing the offset of a variable in memory
