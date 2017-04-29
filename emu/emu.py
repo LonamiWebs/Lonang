@@ -198,7 +198,7 @@ while True:
 
     if not shouldignore(line):
         ins, params = get_ins_params(line)
-        method = instructions.get(ins)
+        method = instructions.get(ins.lower())
         if method is None:
             print(f'err: instruction {ins} not implemented')
             quit()
