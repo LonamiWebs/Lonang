@@ -10,10 +10,9 @@ def mul(m, params):
     if size == 8:
         m['ax'] = m['al'] * m[src]
     elif size == 16:
-        ax = m['ax']
-        result = ax * m[src]
+        result = m['ax'] * m[src]
         m['dx'] = result >> 16
-        m['ax'] = ax & 0xffff
+        m['ax'] = result & 0xffff
     else:
         print(f'err: invalid operand size on mul')
         quit()
