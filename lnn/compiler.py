@@ -1,4 +1,5 @@
 import re
+from utils import stripcomments
 from statements import statements
 from compiler_state import CompilerState
 
@@ -24,11 +25,8 @@ class Compiler:
                 # Ignore this line
                 continue
 
-            # Delete everything after the semicolon (inline comment)
-            if ';' in line:
-                line = line[:line.index(';')]
-
-            line = line.strip()
+            # Strip inline comments, if any
+            line = stripcomments(line)
             if not line:
                 continue
 

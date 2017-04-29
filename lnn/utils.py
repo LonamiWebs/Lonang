@@ -23,6 +23,31 @@ ctoi = {
 }
 
 
+def stripcomments(line):
+    """Strips the comments from 'line'"""
+    if ';' not in line:
+        return line.strip()
+
+    p = None
+    result = []
+    in_char = False
+    in_string = False
+    for c in line:
+        if c == "'" and not in_string and p != '\\':
+            in_char = not in_char
+
+        if c == '"' and not in_char and p != '\\':
+            in_string = not in_string
+
+        elif c == ';' and not in_char and not in_string:
+            break
+
+        result.append(c)
+        p = c
+
+    return ''.join(result).strip()
+
+
 def helperassign(c, dst, src):
     """Helper assign with support for assigning 8 bits to 16
         and vice versa, as well as assigning multiple values

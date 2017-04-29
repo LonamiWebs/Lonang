@@ -3,12 +3,25 @@ import struct
 
 def stripcomments(line):
     """Strips the comments from 'line'"""
-    # TODO strip comments in a nicer way
-    semicolon = line.find(';')
-    if semicolon != -1:
-        line = line[:semicolon]
+    if ';' not in line:
+        return line.strip()
 
-    return line.strip()
+    result = []
+    in_char = False
+    in_string = False
+    for c in line:
+        if c == "'" and not in_string:
+            in_char = not in_char
+
+        if c == '"' and not in_char:
+            in_string = not in_string
+
+        elif c == ';' and not in_char and not in_string:
+            break
+
+        result.append(c)
+
+    return ''.join(result).strip()
 
 
 def pack_value(v, size):
