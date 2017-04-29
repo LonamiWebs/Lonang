@@ -1,6 +1,7 @@
 #!/usr/bin/python3.6
 
 import os
+import re
 import sys
 import struct
 import shutil
@@ -15,12 +16,6 @@ from parser import parsevalues, stripcomments
 keyword_size = {
     'db': 8,
     'dw': 16
-}
-
-# size in bits -> struct pack mode
-size_structpack = {
-    8: '<b',
-    16: '<h'
 }
 
 
@@ -63,10 +58,8 @@ def shouldignore(line):
            getend(line, 'segment') is not None
 
 
-
-
-
-
+# Load the file specified on the arguments
+machine = Machine()
 if len(sys.argv) != 2 or not os.path.isfile(sys.argv[1]):
     print('err: the file to run must be passed as a parameter')
     quit()
@@ -75,12 +68,6 @@ filename = sys.argv[1]
 if not os.path.isfile(filename):
     print(f'err: {filename} not found')
     quit()
-
-
-machine = Machine()
-
-
-
 
 
 # The code will be all the lines, so we can use a label index
@@ -105,16 +92,16 @@ lines = load_lines(filename)
 # Before anything else, we need to replace the macros on the source
 macros = {}
 inline_macros = {}
+inline_re = re.compile(r'\bequ\b', re.IGNORECASE)
 
 expanded = []
 current_macro = None
 for line in lines:
     if not current_macro:
         # No macro, this line may define one (single line or not)
-        # TODO Support for non-caps, non-surrounding spaces with regex
-        if ' EQU ' in line:
-            name, value = [s.strip() for s in line.split(' EQU ')]
-            inline_macros[name] = value
+        if inline_re.search(line):
+            name, value = inline_re.split(line)
+            inline_macros[name.strip()] = value.strip()
             continue
 
         current_macro = getend(line, 'macro')
