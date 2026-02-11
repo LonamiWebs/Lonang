@@ -1,3 +1,7 @@
+Moved to https://codeberg.org/Lonami/Lonang. The GitHub repository may be deleted in the future.
+
+---
+
 # Lonang 8086 Compiler
 This compiler translates a made up language, known as *Lonang*, into an
 assembly file to be ran by a 8086 machine. For more information about
